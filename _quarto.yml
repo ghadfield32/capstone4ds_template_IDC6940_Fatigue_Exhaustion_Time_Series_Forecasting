@@ -1,4 +1,25 @@
 project:
   type: website
+  output-dir: docs
+  
+website:
+  title: "Modeling Fatigue and Injury Risk in Baseball Pitching"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: slides.qmd
+        text: Presentation
+      - text: "Notebooks"
+        menu:
+          - href: final_notebooks/lstm_rnn_energy_predict_granular_dataset_final_project.html
+            text: "LSTM RNN Energy Prediction"
+    tools:
+      - icon: github
+        href: https://github.com/ghadfield32/emg_fatigue_analysis
+
 format:
-  html: default
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
