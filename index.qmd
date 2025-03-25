@@ -1,152 +1,120 @@
 ---
-title: "Writing a great story for data science projects - spring 2025"
-subtitle: "This is a Report Template Quarto"
-author: "Students names (Advisor: Dr. Cohen)"
-date: '`r Sys.Date()`'
-format:
-  html:
-    code-fold: true
-course: Capstone Projects in Data Science
-bibliography: references.bib # file contains bibtex for references
-#always_allow_html: true # this allows to get PDF with HTML features
-self-contained: true
-execute: 
-  warning: false
-  message: false
-editor: 
-  markdown: 
-    wrap: 72
+title: "Capstone Project: Modeling Fatigue and Injury Risk in Baseball Pitching"
+author: "Geoffrey Hadfield"
+date: "2025-03-24"
+format: html
+editor: visual
 ---
 
-Slides: [slides.html](slides.html){target="_blank"} ( Go to `slides.qmd`
-to edit)
+Abstract
 
-::: callout-important
-**Remember:** Your goal is to make your audience understand and care
-about your findings. By crafting a compelling story, you can effectively
-communicate the value of your data science project.
+In this capstone project, we leverage real athlete data from Driveline Baseball alongside novel sensor measurements to predict fatigue and joint injury risks in baseball pitchers. Using an LSTM-based recurrent neural network (RNN) architecture, the project combines biomechanical data with simulated physiological metrics. Two parallel pipelines—one for regression (predicting trial exhaustion rates) and another for classification (identifying joint injury risk)—are developed. This work integrates advanced feature engineering, temporal dynamics, and modular data preprocessing, offering robust insights for injury prevention and performance analytics.
+Introduction
 
-Carefully read this template since it has instructions and tips to
-writing!
-:::
+Recent advances in sports science have underscored the importance of combining biomechanical and physiological data for injury prevention. In my internship at Driveline Baseball, the dataset was upgraded to include real athlete data. To further enhance the analysis, this project incorporates EMG sensors to capture muscle contraction, acceleration, and gyroscopic measurements during the pitching motion. These additional measurements—placed on the flexor carpi radialis (FCR) and other key muscles—aim to improve the prediction of ulnar collateral ligament (UCL) injuries.
 
-## Introduction
+Two resources support this work:
 
-The introduction should:
+    The raw sensor data is being compiled and will be available at emg_fatigue_analysis.
 
--   Develop a storyline that captures attention and maintains interest.
+    A pre-established pipeline for LSTM-based fatigue prediction is available at LSTM RNN Pipeline.
 
--   Your audience is your peers
+Literature Review
 
--   Clearly state the problem or question you're addressing.
+The literature indicates that predicting fatigue and injury risk in athletes requires an integration of biomechanical outputs with physiological signals. Key findings from previous studies include:
 
-<!-- -->
+    Athlete Burnout: Research has shown that burnout is influenced by multiple factors (e.g., stress, training load, support systems) that vary among athletes. Customizing training and recovery protocols based on individual warning signs may mitigate injury risks.
 
--   Introduce why it is relevant needs.
+    Fatigue Data Collection: Detailed datasets have been published to capture muscle activity, motion capture data, and self-reported fatigue levels during shoulder rotations. These resources serve as a foundation for building predictive algorithms.
 
--   Provide an overview of your approach.
+    Methodological Advances: Recent studies have applied neural network architectures to model fatigue—such as a fully-connected network for predicting crack growth in metals [DOI: 10.1016/j.engfracmech.2020.107402]—and used combined physical and physiological workload metrics to forecast injury risk in professional soccer players [DOI: 10.52082/jssm.2024.537].
 
-Example of writing including citing references:
+These studies, along with tutorials on SHAP values and Bayesian optimization from DataCamp, inform our approach to feature engineering and model selection.
+Methodology
+Data Loading and Preprocessing
 
-*This is an introduction to ..... regression, which is a non-parametric
-estimator that estimates the conditional expectation of two variables
-which is random. The goal of a kernel regression is to discover the
-non-linear relationship between two random variables. To discover the
-non-linear relationship, kernel estimator or kernel smoothing is the
-main method to estimate the curve for non-parametric statistics. In
-kernel estimator, weight function is known as kernel function
-[@efr2008]. Cite this paper [@bro2014principal]. The GEE [@wang2014].
-The PCA [@daffertshofer2004pca]*. Topology can be used in machine learning [@adams2021topology]
+The project begins by merging a CSV file containing trial-level measurements (e.g., joint energy and power) with participant metadata using unique identifiers like trial_id and player_participant_id. Rigorous data cleaning (including imputation and removal of missing values) is performed with comprehensive logging and debugging routines.
+Feature Engineering
 
-*This is my work and I want to add more work...*
+Key features derived in this project include:
 
-## Methods
+    Joint Metrics: Aggregated joint energy and power are computed to serve as primary indicators of physical output.
 
--   Detail the models or algorithms used.
+    Simulated Physiological Measures: A simulated heart rate is calculated as a function of mean and joint energy. In addition, “fake body” metrics (sleep quality, sleep duration, resting heart rate, heart rate variability, and stress index) are introduced to mimic wearable sensor data.
 
--   Justify your choices based on the problem and data.
+    Temporal Dynamics: Lag features (e.g., previous trial exhaustion) and rolling statistics (moving averages, volatility measures) capture trends across trials. The trial exhaustion rate is defined as the change in exhaustion per trial.
 
-*The common non-parametric regression model is*
-$Y_i = m(X_i) + \varepsilon_i$*, where* $Y_i$ *can be defined as the sum
-of the regression function value* $m(x)$ *for* $X_i$*. Here* $m(x)$ *is
-unknown and* $\varepsilon_i$ *some errors. With the help of this
-definition, we can create the estimation for local averaging i.e.*
-$m(x)$ *can be estimated with the product of* $Y_i$ *average and* $X_i$
-*is near to* $x$*. In other words, this means that we are discovering
-the line through the data points with the help of surrounding data
-points. The estimation formula is printed below [@R-base]:*
+    Asymmetry Features: Differences between left and right joint metrics are measured to detect imbalances that may predispose athletes to injury.
 
-$$
-M_n(x) = \sum_{i=1}^{n} W_n (X_i) Y_i  \tag{1}
-$$$W_n(x)$ *is the sum of weights that belongs to all real numbers.
-Weights are positive numbers and small if* $X_i$ *is far from* $x$*.*
+Workout Simulation
 
+To mimic the progression of fatigue:
 
-*Another equation:*
+    Workout 1: Contains the original 125 trials.
 
-$$
-y_i = \beta_0 + \beta_1 X_1 +\varepsilon_i
-$$
+    Workout 2: Is a duplicate of the original trials but simulates gradual deterioration in fake body metrics (e.g., lower sleep quality, higher resting heart rate) by adding a workout_id and trial counter. These two datasets are concatenated to form a comprehensive dataset for subsequent modeling.
 
-## Analysis and Results
+Predictive Modeling Pipelines
+Pipeline 1: Regression for Predicting Trial Exhaustion Rate
 
-### Data Exploration and Visualization
+    Input Features: Aggregated joint metrics, simulated physiological features, and temporal features.
 
--   Describe your data sources and collection process.
+    Model: A baseline linear regression model is used, with future plans to incorporate Random Forests, Gradient Boosting, or LSTM networks.
 
--   Present initial findings and insights through visualizations.
+    Evaluation: Model performance is assessed using Mean Absolute Error (MAE), Root Mean Squared Error (RMSE), and R², along with visualizations comparing predicted versus actual exhaustion rates.
 
--   Highlight unexpected patterns or anomalies.
+Pipeline 2: Classification for Predicting Joint Injury Risk
 
-A study was conducted to determine how...
+    Input Features: Joint-specific metrics, asymmetry measurements, and cumulative load indicators.
 
-```{r, warning=FALSE, echo=T, message=FALSE}
-# loading packages 
-library(tidyverse)
-library(knitr)
-library(ggthemes)
-library(ggrepel)
-library(dslabs)
-```
+    Labeling: Trials are classified as high injury risk if a rolling sum of joint stress exceeds a threshold (e.g., the 75th percentile).
 
-```{r, warning=FALSE, echo=TRUE}
-# Load Data
-kable(head(murders))
+    Model: Initially, logistic regression or decision tree classifiers are employed. Future work may involve Random Forests or neural network-based methods.
 
-ggplot1 = murders %>% ggplot(mapping = aes(x=population/10^6, y=total)) 
+    Evaluation: Metrics such as accuracy, precision, recall, F1-score, and ROC-AUC are used, supplemented by feature importance analyses using SHAP values.
 
-  ggplot1 + geom_point(aes(col=region), size = 4) +
-  geom_text_repel(aes(label=abb)) +
-  scale_x_log10() +
-  scale_y_log10() +
-  geom_smooth(formula = "y~x", method=lm,se = F)+
-  xlab("Populations in millions (log10 scale)") + 
-  ylab("Total number of murders (log10 scale)") +
-  ggtitle("US Gun Murders in 2010") +
-  scale_color_discrete(name = "Region")+
-      theme_bw()
-  
+Integration and Modularity
 
-```
+Both pipelines share common preprocessing and feature engineering modules, ensuring that the workflow is modular and reproducible. Visualization tools—including histograms, correlation matrices, and temporal trend plots—are used throughout the analysis to validate each transformation step.
+Experimental Results
 
-### Modeling and Results
+The LSTM-based regression model for fatigue prediction demonstrated promising results:
 
--   Explain your data preprocessing and cleaning steps.
+    MSE: 0.00596
 
--   Present your key findings in a clear and concise manner.
+    MAE: 0.01762
 
--   Use visuals to support your claims.
+    R² Score: 0.91808
 
--   **Tell a story about what the data reveals.**
+Similarly, the injury risk classifier achieved strong performance:
 
-```{r}
+    Overall Accuracy: 98.16%
 
-```
+    Precision: 93.84%
 
-### Conclusion
+    Recall: 99.77%
 
--   Summarize your key findings.
+    F1 Score: 96.72%
 
--   Discuss the implications of your results.
+Joint-specific models yielded varying metrics, reflecting the inherent complexity of localized biomechanical data.
+Discussion
 
-## References
+This project illustrates the successful application of deep learning to model fatigue and predict injury risk in a real-world sports setting. Key challenges included managing the variability in biomechanical signals and optimizing model performance through careful feature engineering. The integration of temporal dynamics and asymmetry features was critical in capturing the underlying physiological responses. Future work may explore attention mechanisms or hybrid architectures to further refine predictive accuracy.
+Conclusion
+
+By combining real athlete data with simulated physiological metrics, this capstone project provides a novel approach to predicting fatigue and injury risks in baseball pitchers. The dual-pipeline strategy (regression and classification) along with modular integration of preprocessing and feature engineering modules establishes a robust framework that is transparent, reproducible, and adaptable for future research and practical deployment.
+References
+
+    DataCamp Tutorial: Introduction to SHAP Values for Machine Learning Interpretability
+
+    DataCamp Tutorial: Mastering Bayesian Optimization in Data Science
+
+    Fatigue Analysis Study, DOI: 10.1016/j.engfracmech.2020.107402
+
+    Injury Prediction Study, DOI: 10.52082/jssm.2024.537
+
+    Nature Articles:
+
+        Factors Leading to Athlete Burnout
+
+        Dataset for Fatigue Analysis during Shoulder Rotations
