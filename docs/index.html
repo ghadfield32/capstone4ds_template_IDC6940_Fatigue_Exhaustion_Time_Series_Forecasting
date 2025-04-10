@@ -9,7 +9,7 @@
 <meta name="author" content="Geoffrey Hadfield">
 <meta name="dcterms.date" content="2025-03-24">
 
-<title>Capstone Project: Modeling Fatigue and Injury Risk in Baseball Pitching – Modeling Fatigue and Injury Risk in Baseball Pitching</title>
+<title>Capstone Project: Modeling Fatigue and Injury Risk in Athletic Movements like Basketball Shooting – Modeling Fatigue and Injury Risk in Baseball Pitching</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -157,16 +157,14 @@ window.Quarto = {
    
   <ul>
   <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
-  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
+  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a></li>
+  <li><a href="#data-description" id="toc-data-description" class="nav-link" data-scroll-target="#data-description">Data Description</a></li>
+  <li><a href="#analysis-and-results" id="toc-analysis-and-results" class="nav-link" data-scroll-target="#analysis-and-results">Analysis and Results</a>
   <ul class="collapse">
-  <li><a href="#lstm-long-short-term-memory-networks" id="toc-lstm-long-short-term-memory-networks" class="nav-link" data-scroll-target="#lstm-long-short-term-memory-networks">LSTM (Long Short-Term Memory) Networks</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li><a href="#resources" id="toc-resources" class="nav-link" data-scroll-target="#resources">Resources</a></li>
   </ul></li>
-  <li><a href="#data-description" id="toc-data-description" class="nav-link" data-scroll-target="#data-description">Data Description</a>
-  <ul class="collapse">
-  <li><a href="#variables-overview" id="toc-variables-overview" class="nav-link" data-scroll-target="#variables-overview">Variables Overview</a></li>
-  <li><a href="#descriptive-statistics" id="toc-descriptive-statistics" class="nav-link" data-scroll-target="#descriptive-statistics">Descriptive Statistics</a></li>
-  <li><a href="#data-visualizations" id="toc-data-visualizations" class="nav-link" data-scroll-target="#data-visualizations">Data Visualizations</a></li>
-  </ul></li>
+  <li><a href="#example" id="toc-example" class="nav-link" data-scroll-target="#example">EXAMPLE:</a></li>
   </ul>
 </nav>
     </div>
@@ -175,7 +173,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Capstone Project: Modeling Fatigue and Injury Risk in Baseball Pitching</h1>
+<h1 class="title">Capstone Project: Modeling Fatigue and Injury Risk in Athletic Movements like Basketball Shooting</h1>
 </div>
 
 
@@ -206,14 +204,17 @@ window.Quarto = {
 
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>Fatigue and injury risk modeling have become pivotal in sports analytics, particularly for baseball pitchers. Predicting fatigue levels and assessing injury risk help in optimizing training programs and enhancing athlete longevity. Long Short-Term Memory (LSTM) networks, a type of Recurrent Neural Network (RNN), offer significant potential due to their ability to capture temporal patterns and sequential dependencies, critical in physiological and biomechanical data analysis.</p>
-<p>Recent developments have showcased that fatigue accumulation can directly impact injury susceptibility, highlighting the importance of accurately modeling temporal fatigue progression. This project aims to leverage LSTM models to effectively forecast fatigue levels and predict joint injury risks in baseball pitchers, contributing valuable insights for injury prevention strategies and optimized athletic performance.</p>
+<p>Fatigue and injury risk modeling have become pivotal in sports analytics, particularly for basketball players. Predicting fatigue levels and assessing injury risk help in optimizing training programs and enhancing athlete longevity. Long Short-Term Memory (LSTM) networks, a type of Recurrent Neural Network (RNN), offer significant potential due to their ability to capture temporal patterns and sequential dependencies, critical in physiological and biomechanical data analysis.</p>
+<p>Recent developments have showcased that fatigue accumulation can directly impact injury susceptibility, highlighting the importance of accurately modeling temporal fatigue progression. This project aims to leverage LSTM models to effectively forecast fatigue levels and predict joint injury risks in basketball players, contributing valuable insights for injury prevention strategies and optimized athletic performance.</p>
 <p>Previous research on LSTM’s efficacy in fatigue modeling forms the basis of our methodological approach, emphasizing the use of biomechanical and simulated physiological data.</p>
+<p>Athlete Burnout: Research has shown that burnout is influenced by multiple factors (e.g., stress, training load, support systems) that vary among athletes. Customizing training and recovery protocols based on individual warning signs may mitigate injury risks.</p>
+<p>Fatigue Data Collection: Detailed datasets have been published to capture muscle activity, motion capture data, and self-reported fatigue levels during shoulder rotations. These resources serve as a foundation for building predictive algorithms.</p>
+<p>Methodological Advances: Recent studies have applied neural network architectures to model fatigue—such as a fully-connected network for predicting crack growth in metals [DOI: 10.1016/j.engfracmech.2020.107402]—and used combined physical and physiological workload metrics to forecast injury risk in professional soccer players [DOI: 10.52082/jssm.2024.537].</p>
 </section>
 <section id="methods" class="level2">
 <h2 class="anchored" data-anchor-id="methods">Methods</h2>
-<section id="lstm-long-short-term-memory-networks" class="level3">
-<h3 class="anchored" data-anchor-id="lstm-long-short-term-memory-networks">LSTM (Long Short-Term Memory) Networks</h3>
+<section id="lstm-long-short-term-memory-networks" class="level5">
+<h5 class="anchored" data-anchor-id="lstm-long-short-term-memory-networks">LSTM (Long Short-Term Memory) Networks</h5>
 <p>Long Short-Term Memory (LSTM) networks are a specialized type of Recurrent Neural Network (RNN) designed to overcome the vanishing gradient problem that typically hinders standard RNNs when modeling long-term dependencies. Unlike traditional RNNs, LSTMs utilize gating mechanisms to selectively retain or discard information over sequences.</p>
 <p>The core components of an LSTM cell include:</p>
 <ul>
@@ -234,12 +235,22 @@ Controls the information output to the next hidden state.</p></li>
 <p>Here, ( W ) and ( b ) represent weights and biases, respectively, ( ) is the sigmoid function, and ( ) is element-wise multiplication.</p>
 <p>Compared to standard RNNs, LSTMs are especially effective in handling data with temporal correlations—making them suitable for modeling fatigue progression and injury risk in sequential biomechanical and physiological data.</p>
 </section>
+<section id="preprocessing-options" class="level5">
+<h5 class="anchored" data-anchor-id="preprocessing-options">Preprocessing Options:</h5>
+<p>Sequencing into categories of different lengths causing us to test DTW vs Pad vs set_window to understand what would be the best option for handling this data</p>
+</section>
 </section>
 <section id="data-description" class="level2">
 <h2 class="anchored" data-anchor-id="data-description">Data Description</h2>
-<p>The dataset utilized in this project comprises biomechanical and simulated physiological data collected from baseball pitchers at Driveline Baseball. Data was gathered during pitching trials, incorporating joint-level biomechanical metrics and simulated physiological signals.</p>
-<section id="variables-overview" class="level3">
-<h3 class="anchored" data-anchor-id="variables-overview">Variables Overview</h3>
+<p>The dataset utilized in this project comprises biomechanical and simulated physiological data collected from a Basketball Player from SPL Open Biomech dataset. Data was gathered during basketball shooting trials, incorporating joint-level biomechanical metrics and simulated physiological signals.</p>
+<p>Key features derived in this project include:</p>
+<p>Joint Metrics: Aggregated joint energy and power are computed to serve as primary indicators of physical output.</p>
+<p>Simulated Physiological Measures: A simulated heart rate is calculated as a function of mean and joint energy. In addition, “fake body” metrics (sleep quality, sleep duration, resting heart rate, heart rate variability, and stress index) are introduced to mimic wearable sensor data.</p>
+<p>Temporal Dynamics: Lag features (e.g., previous trial exhaustion) and rolling statistics (moving averages, volatility measures) capture trends across trials. The trial exhaustion rate is defined as the change in exhaustion per trial.</p>
+<p>Asymmetry Features: Differences between left and right joint metrics are measured to detect imbalances that may predispose athletes to injury.</p>
+<p>Workout Simulation</p>
+<p>To mimic the progression of fatigue:</p>
+<p>Workout: Contains the original 125 trials.</p>
 <ul>
 <li><strong>Joint Metrics:</strong>
 <ul>
@@ -266,181 +277,284 @@ Controls the information output to the next hidden state.</p></li>
 </ul></li>
 </ul>
 </section>
-<section id="descriptive-statistics" class="level3">
-<h3 class="anchored" data-anchor-id="descriptive-statistics">Descriptive Statistics</h3>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 41%">
-<col style="width: 18%">
-<col style="width: 11%">
-<col style="width: 12%">
-<col style="width: 7%">
-<col style="width: 8%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Variable</th>
-<th>Type</th>
-<th>Mean</th>
-<th>Std Dev</th>
-<th>Min</th>
-<th>Max</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Joint Energy</td>
-<td>Numeric</td>
-<td>150</td>
-<td>25</td>
-<td>50</td>
-<td>250</td>
-</tr>
-<tr class="even">
-<td>Joint Power</td>
-<td>Numeric</td>
-<td>550</td>
-<td>120</td>
-<td>100</td>
-<td>1000</td>
-</tr>
-<tr class="odd">
-<td>Simulated Heart Rate</td>
-<td>Numeric</td>
-<td>120</td>
-<td>15</td>
-<td>60</td>
-<td>180</td>
-</tr>
-<tr class="even">
-<td>Sleep Quality</td>
-<td>Numeric</td>
-<td>75</td>
-<td>10</td>
-<td>40</td>
-<td>100</td>
-</tr>
-<tr class="odd">
-<td>Sleep Duration</td>
-<td>Numeric</td>
-<td>7</td>
-<td>1.2</td>
-<td>4</td>
-<td>10</td>
-</tr>
-<tr class="even">
-<td>Resting Heart Rate</td>
-<td>Numeric</td>
-<td>55</td>
-<td>7</td>
-<td>40</td>
-<td>70</td>
-</tr>
-<tr class="odd">
-<td>Heart Rate Variability</td>
-<td>Numeric</td>
-<td>80</td>
-<td>15</td>
-<td>20</td>
-<td>150</td>
-</tr>
-<tr class="even">
-<td>Stress Index</td>
-<td>Numeric</td>
-<td>50</td>
-<td>20</td>
-<td>0</td>
-<td>100</td>
-</tr>
-</tbody>
-</table>
+<section id="analysis-and-results" class="level2">
+<h2 class="anchored" data-anchor-id="analysis-and-results">Analysis and Results</h2>
+<section id="descriptive-statistics" class="level5">
+<h5 class="anchored" data-anchor-id="descriptive-statistics">Descriptive Statistics</h5>
+<p>Descriptive Statistics: Variable Type Mean Std Dev<br>
+0 joint_energy float64 1.346318 9.144608e-01<br>
+1 joint_power float64 20.153438 1.250285e+01<br>
+2 energy_acceleration float64 -11458.531869 1.333065e+05<br>
+3 hip_asymmetry float64 0.004024 6.579138e-03<br>
+4 wrist_asymmetry float64 0.022392 2.180127e-02<br>
+5 rolling_power_std float64 3.349565 3.234210e+00<br>
+6 rolling_hr_mean float64 61.079085 5.164486e-01<br>
+7 rolling_energy_std float64 0.203486 3.885164e-01<br>
+8 simulated_HR float64 61.079297 5.498151e-01<br>
+9 player_height_in_meters float64 1.910000 0.000000e+00<br>
+10 player_weight__in_kg float64 90.700000 4.263389e-14<br>
+11 by_trial_exhaustion_score float64 0.450268 2.666154e-01<br>
+12 injury_risk int32 0.274897 4.464764e-01</p>
+<pre><code>         Min        Max  </code></pre>
+<p>0 0.000000e+00 49.115825<br>
+1 0.000000e+00 60.832273<br>
+2 -2.189662e+06 0.072830<br>
+3 0.000000e+00 0.184738<br>
+4 0.000000e+00 0.244317<br>
+5 6.141516e-02 17.383747<br>
+6 6.009147e+01 63.641281<br>
+7 2.190869e-03 19.403572<br>
+8 6.000000e+01 75.117490<br>
+9 1.910000e+00 1.910000<br>
+10 9.070000e+01 90.700000<br>
+11 0.000000e+00 1.000000<br>
+12 0.000000e+00 1.000000</p>
+<p><img src="images/corr_by_trial_exhaustion_score.png" alt="A descriptive alt text" style="width:50%; display:block; margin: 0 auto;"></p>
+<p>Correlation matrix for ‘by_trial_exhaustion_score’ with selected features: joint_energy joint_power energy_acceleration<br>
+joint_energy 1.000000 0.909506 0.126557<br>
+joint_power 0.909506 1.000000 0.138562<br>
+energy_acceleration 0.126557 0.138562 1.000000<br>
+hip_asymmetry 0.337483 0.271547 0.052571<br>
+wrist_asymmetry 0.298441 0.313432 0.088292<br>
+rolling_power_std 0.131956 0.144989 -0.173823<br>
+rolling_hr_mean 0.580720 0.622465 -0.075317<br>
+rolling_energy_std 0.219730 0.063468 -0.085464<br>
+simulated_HR 0.721382 0.699768 0.168744<br>
+player_height_in_meters NaN NaN NaN<br>
+player_weight__in_kg NaN NaN NaN<br>
+by_trial_exhaustion_score 0.305779 0.338143 0.145175</p>
+<pre><code>                       hip_asymmetry  wrist_asymmetry  rolling_power_std  \</code></pre>
+<p>joint_energy 0.337483 0.298441 0.131956<br>
+joint_power 0.271547 0.313432 0.144989<br>
+energy_acceleration 0.052571 0.088292 -0.173823<br>
+hip_asymmetry 1.000000 0.060808 0.013738<br>
+wrist_asymmetry 0.060808 1.000000 0.180543<br>
+rolling_power_std 0.013738 0.180543 1.000000<br>
+rolling_hr_mean -0.023484 0.324528 0.346268<br>
+rolling_energy_std 0.092390 0.095367 0.497836<br>
+simulated_HR -0.000801 0.343949 0.212884<br>
+player_height_in_meters NaN NaN NaN<br>
+player_weight__in_kg NaN NaN NaN<br>
+by_trial_exhaustion_score -0.232607 0.268138 0.202155</p>
+<pre><code>                       rolling_hr_mean  rolling_energy_std  simulated_HR  \</code></pre>
+<p>joint_energy 0.580720 0.219730 0.721382<br>
+joint_power 0.622465 0.063468 0.699768<br>
+energy_acceleration -0.075317 -0.085464 0.168744<br>
+hip_asymmetry -0.023484 0.092390 -0.000801<br>
+wrist_asymmetry 0.324528 0.095367 0.343949<br>
+rolling_power_std 0.346268 0.497836 0.212884<br>
+rolling_hr_mean 1.000000 0.238044 0.919149<br>
+rolling_energy_std 0.238044 1.000000 0.174079<br>
+simulated_HR 0.919149 0.174079 1.000000<br>
+player_height_in_meters NaN NaN NaN<br>
+player_weight__in_kg NaN NaN NaN<br>
+by_trial_exhaustion_score 0.865287 0.088595 0.879951</p>
+<pre><code>                       player_height_in_meters  player_weight__in_kg  \</code></pre>
+<p>joint_energy NaN NaN<br>
+joint_power NaN NaN<br>
+energy_acceleration NaN NaN<br>
+hip_asymmetry NaN NaN<br>
+wrist_asymmetry NaN NaN<br>
+rolling_power_std NaN NaN<br>
+rolling_hr_mean NaN NaN<br>
+rolling_energy_std NaN NaN<br>
+simulated_HR NaN NaN<br>
+player_height_in_meters NaN NaN<br>
+player_weight__in_kg NaN NaN<br>
+by_trial_exhaustion_score NaN NaN</p>
+<pre><code>                       by_trial_exhaustion_score  </code></pre>
+<p>joint_energy 0.305779<br>
+joint_power 0.338143<br>
+energy_acceleration 0.145175<br>
+hip_asymmetry -0.232607<br>
+wrist_asymmetry 0.268138<br>
+rolling_power_std 0.202155<br>
+rolling_hr_mean 0.865287<br>
+rolling_energy_std 0.088595<br>
+simulated_HR 0.879951<br>
+player_height_in_meters NaN<br>
+player_weight__in_kg NaN<br>
+by_trial_exhaustion_score 1.000000</p>
+<p>Correlation matrix for ‘injury_risk’ with selected features: joint_energy joint_power energy_acceleration<br>
+joint_energy 1.000000 0.909506 0.126557<br>
+joint_power 0.909506 1.000000 0.138562<br>
+energy_acceleration 0.126557 0.138562 1.000000<br>
+hip_asymmetry 0.337483 0.271547 0.052571<br>
+wrist_asymmetry 0.298441 0.313432 0.088292<br>
+rolling_power_std 0.131956 0.144989 -0.173823<br>
+rolling_hr_mean 0.580720 0.622465 -0.075317<br>
+rolling_energy_std 0.219730 0.063468 -0.085464<br>
+simulated_HR 0.721382 0.699768 0.168744<br>
+player_height_in_meters NaN NaN NaN<br>
+player_weight__in_kg NaN NaN NaN<br>
+injury_risk 0.366639 0.404424 -0.139607</p>
+<pre><code>                     hip_asymmetry  wrist_asymmetry  rolling_power_std  \</code></pre>
+<p>joint_energy 0.337483 0.298441 0.131956<br>
+joint_power 0.271547 0.313432 0.144989<br>
+energy_acceleration 0.052571 0.088292 -0.173823<br>
+hip_asymmetry 1.000000 0.060808 0.013738<br>
+wrist_asymmetry 0.060808 1.000000 0.180543<br>
+rolling_power_std 0.013738 0.180543 1.000000<br>
+rolling_hr_mean -0.023484 0.324528 0.346268<br>
+rolling_energy_std 0.092390 0.095367 0.497836<br>
+simulated_HR -0.000801 0.343949 0.212884<br>
+player_height_in_meters NaN NaN NaN<br>
+player_weight__in_kg NaN NaN NaN<br>
+injury_risk 0.077084 0.236727 0.365599</p>
+<pre><code>                     rolling_hr_mean  rolling_energy_std  simulated_HR  \</code></pre>
+<p>joint_energy 0.580720 0.219730 0.721382<br>
+joint_power 0.622465 0.063468 0.699768<br>
+energy_acceleration -0.075317 -0.085464 0.168744<br>
+hip_asymmetry -0.023484 0.092390 -0.000801<br>
+wrist_asymmetry 0.324528 0.095367 0.343949<br>
+rolling_power_std 0.346268 0.497836 0.212884<br>
+rolling_hr_mean 1.000000 0.238044 0.919149<br>
+rolling_energy_std 0.238044 1.000000 0.174079<br>
+simulated_HR 0.919149 0.174079 1.000000<br>
+player_height_in_meters NaN NaN NaN<br>
+player_weight__in_kg NaN NaN NaN<br>
+injury_risk 0.652248 0.169955 0.543222</p>
+<pre><code>                     player_height_in_meters  player_weight__in_kg  \</code></pre>
+<p>joint_energy NaN NaN<br>
+joint_power NaN NaN<br>
+energy_acceleration NaN NaN<br>
+hip_asymmetry NaN NaN<br>
+wrist_asymmetry NaN NaN<br>
+rolling_power_std NaN NaN<br>
+rolling_hr_mean NaN NaN<br>
+rolling_energy_std NaN NaN<br>
+simulated_HR NaN NaN<br>
+player_height_in_meters NaN NaN<br>
+player_weight__in_kg NaN NaN<br>
+injury_risk NaN NaN</p>
+<pre><code>                     injury_risk  </code></pre>
+<p>joint_energy 0.366639<br>
+joint_power 0.404424<br>
+energy_acceleration -0.139607<br>
+hip_asymmetry 0.077084<br>
+wrist_asymmetry 0.236727<br>
+rolling_power_std 0.365599<br>
+rolling_hr_mean 0.652248<br>
+rolling_energy_std 0.169955<br>
+simulated_HR 0.543222<br>
+player_height_in_meters NaN<br>
+player_weight__in_kg NaN<br>
+injury_risk 1.000000</p>
+<p>Feature Importance for target ‘by_trial_exhaustion_score’: Feature Perm_Importance SHAP_Importance 8 simulated_HR 1.386061 0.199147 6 rolling_hr_mean 0.454274 0.077322 0 joint_energy 0.109296 0.045438 1 joint_power 0.031813 0.023560 2 energy_acceleration 0.003993 0.002480 4 wrist_asymmetry 0.001665 0.002465 7 rolling_energy_std 0.000693 0.001707 5 rolling_power_std 0.000639 0.002280 3 hip_asymmetry 0.000099 0.000205 9 player_height_in_meters 0.000000 0.000000 10 player_weight__in_kg 0.000000 0.000000</p>
+<p>Feature Importance for target ‘injury_risk’: Feature Perm_Importance SHAP_Importance 6 rolling_hr_mean 1.079943 0.278289 8 simulated_HR 0.541816 0.082835 0 joint_energy 0.154789 0.028769 1 joint_power 0.145825 0.028232 2 energy_acceleration 0.072137 0.022768 5 rolling_power_std 0.056597 0.023569 7 rolling_energy_std 0.042963 0.015189 4 wrist_asymmetry 0.011434 0.004545 3 hip_asymmetry 0.002956 0.003068 9 player_height_in_meters 0.000000 0.000000 10 player_weight__in_kg 0.000000 0.000000</p>
 </section>
-<section id="data-visualizations" class="level3">
-<h3 class="anchored" data-anchor-id="data-visualizations">Data Visualizations</h3>
+<section id="data-visualizations" class="level5">
+<h5 class="anchored" data-anchor-id="data-visualizations">Data Visualizations</h5>
 <ul>
 <li>Histogram distributions for joint metrics.</li>
 <li>Scatter plots showing correlation between physiological metrics and fatigue rates.</li>
 <li>Temporal trend lines visualizing progression across trials.</li>
 </ul>
-<hr>
-<p>Abstract</p>
-<p>In this capstone project, we leverage real athlete data from Driveline Baseball alongside novel sensor measurements to predict fatigue and joint injury risks in baseball pitchers. Using an LSTM-based recurrent neural network (RNN) architecture, the project combines biomechanical data with simulated physiological metrics. Two parallel pipelines—one for regression (predicting trial exhaustion rates) and another for classification (identifying joint injury risk)—are developed. This work integrates advanced feature engineering, temporal dynamics, and modular data preprocessing, offering robust insights for injury prevention and performance analytics. Introduction</p>
-<p>Recent advances in sports science have underscored the importance of combining biomechanical and physiological data for injury prevention. In my internship at Driveline Baseball, the dataset was upgraded to include real athlete data. To further enhance the analysis, this project incorporates EMG sensors to capture muscle contraction, acceleration, and gyroscopic measurements during the pitching motion. These additional measurements—placed on the flexor carpi radialis (FCR) and other key muscles—aim to improve the prediction of ulnar collateral ligament (UCL) injuries.</p>
-<p>Two resources support this work:</p>
-<pre><code>The raw sensor data is being compiled and will be available at emg_fatigue_analysis.
+</section>
+<section id="modeling-and-results" class="level5">
+<h5 class="anchored" data-anchor-id="modeling-and-results">Modeling and Results</h5>
+<p>Steps: Explain your data preprocessing and cleaning steps.</p>
+<pre><code>Present your key findings in a clear and concise manner.
 
-A pre-established pipeline for LSTM-based fatigue prediction is available at LSTM RNN Pipeline.</code></pre>
-<p>Literature Review</p>
-<p>The literature indicates that predicting fatigue and injury risk in athletes requires an integration of biomechanical outputs with physiological signals. Key findings from previous studies include:</p>
-<pre><code>Athlete Burnout: Research has shown that burnout is influenced by multiple factors (e.g., stress, training load, support systems) that vary among athletes. Customizing training and recovery protocols based on individual warning signs may mitigate injury risks.
+Use visuals to support your claims.
 
-Fatigue Data Collection: Detailed datasets have been published to capture muscle activity, motion capture data, and self-reported fatigue levels during shoulder rotations. These resources serve as a foundation for building predictive algorithms.
-
-Methodological Advances: Recent studies have applied neural network architectures to model fatigue—such as a fully-connected network for predicting crack growth in metals [DOI: 10.1016/j.engfracmech.2020.107402]—and used combined physical and physiological workload metrics to forecast injury risk in professional soccer players [DOI: 10.52082/jssm.2024.537].</code></pre>
-<p>These studies, along with tutorials on SHAP values and Bayesian optimization from DataCamp, inform our approach to feature engineering and model selection. Methodology Data Loading and Preprocessing</p>
-<p>The project begins by merging a CSV file containing trial-level measurements (e.g., joint energy and power) with participant metadata using unique identifiers like trial_id and player_participant_id. Rigorous data cleaning (including imputation and removal of missing values) is performed with comprehensive logging and debugging routines. Feature Engineering</p>
-<p>Key features derived in this project include:</p>
-<pre><code>Joint Metrics: Aggregated joint energy and power are computed to serve as primary indicators of physical output.
-
-Simulated Physiological Measures: A simulated heart rate is calculated as a function of mean and joint energy. In addition, “fake body” metrics (sleep quality, sleep duration, resting heart rate, heart rate variability, and stress index) are introduced to mimic wearable sensor data.
-
-Temporal Dynamics: Lag features (e.g., previous trial exhaustion) and rolling statistics (moving averages, volatility measures) capture trends across trials. The trial exhaustion rate is defined as the change in exhaustion per trial.
-
-Asymmetry Features: Differences between left and right joint metrics are measured to detect imbalances that may predispose athletes to injury.</code></pre>
-<p>Workout Simulation</p>
-<p>To mimic the progression of fatigue:</p>
-<pre><code>Workout 1: Contains the original 125 trials.
-
-Workout 2: Is a duplicate of the original trials but simulates gradual deterioration in fake body metrics (e.g., lower sleep quality, higher resting heart rate) by adding a workout_id and trial counter. These two datasets are concatenated to form a comprehensive dataset for subsequent modeling.</code></pre>
+Tell a story about what the data reveals.</code></pre>
+<p>work below—————-</p>
 <p>Predictive Modeling Pipelines Pipeline 1: Regression for Predicting Trial Exhaustion Rate</p>
-<pre><code>Input Features: Aggregated joint metrics, simulated physiological features, and temporal features.
-
-Model: A baseline linear regression model is used, with future plans to incorporate Random Forests, Gradient Boosting, or LSTM networks.
-
-Evaluation: Model performance is assessed using Mean Absolute Error (MAE), Root Mean Squared Error (RMSE), and R², along with visualizations comparing predicted versus actual exhaustion rates.</code></pre>
+<p>Input Features: Aggregated joint metrics, simulated physiological features, and temporal features.</p>
+<p>Model: A baseline linear regression model is used, with future plans to incorporate Random Forests, Gradient Boosting, or LSTM networks.</p>
+<p>Evaluation: Model performance is assessed using Mean Absolute Error (MAE), Root Mean Squared Error (RMSE), and R², along with visualizations comparing predicted versus actual exhaustion rates.</p>
 <p>Pipeline 2: Classification for Predicting Joint Injury Risk</p>
-<pre><code>Input Features: Joint-specific metrics, asymmetry measurements, and cumulative load indicators.
-
-Labeling: Trials are classified as high injury risk if a rolling sum of joint stress exceeds a threshold (e.g., the 75th percentile).
-
-Model: Initially, logistic regression or decision tree classifiers are employed. Future work may involve Random Forests or neural network-based methods.
-
-Evaluation: Metrics such as accuracy, precision, recall, F1-score, and ROC-AUC are used, supplemented by feature importance analyses using SHAP values.</code></pre>
+<p>Input Features: Joint-specific metrics, asymmetry measurements, and cumulative load indicators.</p>
+<p>Labeling: Trials are classified as high injury risk if a rolling sum of joint stress exceeds a threshold (e.g., the 75th percentile).</p>
+<p>Model: Initially, logistic regression or decision tree classifiers are employed. Future work may involve Random Forests or neural network-based methods.</p>
+<p>Evaluation: Metrics such as accuracy, precision, recall, F1-score, and ROC-AUC are used, supplemented by feature importance analyses using SHAP values.</p>
 <p>Integration and Modularity</p>
 <p>Both pipelines share common preprocessing and feature engineering modules, ensuring that the workflow is modular and reproducible. Visualization tools—including histograms, correlation matrices, and temporal trend plots—are used throughout the analysis to validate each transformation step. Experimental Results</p>
 <p>The LSTM-based regression model for fatigue prediction demonstrated promising results:</p>
-<pre><code>MSE: 0.00596
-
-MAE: 0.01762
-
-R² Score: 0.91808</code></pre>
+<p>MSE: 0.00596</p>
+<p>MAE: 0.01762</p>
+<p>R² Score: 0.91808</p>
 <p>Similarly, the injury risk classifier achieved strong performance:</p>
-<pre><code>Overall Accuracy: 98.16%
-
-Precision: 93.84%
-
-Recall: 99.77%
-
-F1 Score: 96.72%</code></pre>
+<p>Overall Accuracy: 98.16%</p>
+<p>Precision: 93.84%</p>
+<p>Recall: 99.77%</p>
+<p>F1 Score: 96.72%</p>
+</section>
+<section id="conclusion" class="level3">
+<h3 class="anchored" data-anchor-id="conclusion">Conclusion</h3>
+<p>Steps: Summarize your key findings.</p>
+<pre><code>Discuss the implications of your results.</code></pre>
+<p>—–work below:</p>
 <p>Joint-specific models yielded varying metrics, reflecting the inherent complexity of localized biomechanical data. Discussion</p>
 <p>This project illustrates the successful application of deep learning to model fatigue and predict injury risk in a real-world sports setting. Key challenges included managing the variability in biomechanical signals and optimizing model performance through careful feature engineering. The integration of temporal dynamics and asymmetry features was critical in capturing the underlying physiological responses. Future work may explore attention mechanisms or hybrid architectures to further refine predictive accuracy. Conclusion</p>
-<p>By combining real athlete data with simulated physiological metrics, this capstone project provides a novel approach to predicting fatigue and injury risks in baseball pitchers. The dual-pipeline strategy (regression and classification) along with modular integration of preprocessing and feature engineering modules establishes a robust framework that is transparent, reproducible, and adaptable for future research and practical deployment. References</p>
-<pre><code>DataCamp Tutorial: Introduction to SHAP Values for Machine Learning Interpretability
-
-DataCamp Tutorial: Mastering Bayesian Optimization in Data Science
-
-Fatigue Analysis Study, DOI: 10.1016/j.engfracmech.2020.107402
-
-Injury Prediction Study, DOI: 10.52082/jssm.2024.537
-
-Nature Articles:
-
-    Factors Leading to Athlete Burnout
-
-    Dataset for Fatigue Analysis during Shoulder Rotations</code></pre>
-
-
+<p>By combining real athlete data with simulated physiological metrics, this capstone project provides a novel approach to predicting fatigue and injury risks in basketball players. The dual-pipeline strategy (regression and classification) along with modular integration of preprocessing and feature engineering modules establishes a robust framework that is transparent, reproducible, and adaptable for future research and practical deployment. References</p>
 </section>
+<section id="resources" class="level3">
+<h3 class="anchored" data-anchor-id="resources">Resources</h3>
+<p>DataCamp Tutorial: Introduction to SHAP Values for Machine Learning Interpretability</p>
+<p>DataCamp Tutorial: Mastering Bayesian Optimization in Data Science</p>
+<p>Fatigue Analysis Study, DOI: 10.1016/j.engfracmech.2020.107402</p>
+<p>Injury Prediction Study, DOI: 10.52082/jssm.2024.537</p>
+<p>Nature Articles:</p>
+<pre><code>Factors Leading to Athlete Burnout
+
+Dataset for Fatigue Analysis during Shoulder Rotations</code></pre>
+</section>
+</section>
+<section id="example" class="level2">
+<h2 class="anchored" data-anchor-id="example">EXAMPLE:</h2>
+<p>Writing a great story for data science projects - spring 2025</p>
+<p>This is a Report Template Quarto Author</p>
+<p>Students names (Advisor: Dr.&nbsp;Cohen) Published</p>
+<p>January 14, 2025</p>
+<p>Slides: slides.html ( Go to slides.qmd to edit) Important</p>
+<p>Remember: Your goal is to make your audience understand and care about your findings. By crafting a compelling story, you can effectively communicate the value of your data science project.</p>
+<p>Carefully read this template since it has instructions and tips to writing! Introduction</p>
+<p>The introduction should:</p>
+<pre><code>Develop a storyline that captures attention and maintains interest.
+
+Your audience is your peers
+
+Clearly state the problem or question you’re addressing.
+
+Introduce why it is relevant needs.
+
+Provide an overview of your approach.</code></pre>
+<p>Example of writing including citing references:</p>
+<p>This is an introduction to ….. regression, which is a non-parametric estimator that estimates the conditional expectation of two variables which is random. The goal of a kernel regression is to discover the non-linear relationship between two random variables. To discover the non-linear relationship, kernel estimator or kernel smoothing is the main method to estimate the curve for non-parametric statistics. In kernel estimator, weight function is known as kernel function (Efromovich 2008). Cite this paper (Bro and Smilde 2014). The GEE (Wang 2014). The PCA (Daffertshofer et al.&nbsp;2004). Topology can be used in machine learning (Adams and Moy 2021)</p>
+<p>This is my work and I want to add more work… Methods</p>
+<pre><code>Detail the models or algorithms used.
+
+Justify your choices based on the problem and data.</code></pre>
+<p>The common non-parametric regression model is , where can be defined as the sum of the regression function value for . Here is unknown and some errors. With the help of this definition, we can create the estimation for local averaging i.e.&nbsp;can be estimated with the product of average and is near to</p>
+<p>. In other words, this means that we are discovering the line through the data points with the help of surrounding data points. The estimation formula is printed below (R Core Team 2019):</p>
+<p>is the sum of weights that belongs to all real numbers. Weights are positive numbers and small if is far from</p>
+<p>.</p>
+<p>Another equation:</p>
+<p>Analysis and Results Data Exploration and Visualization</p>
+<pre><code>Describe your data sources and collection process.
+
+Present initial findings and insights through visualizations.
+
+Highlight unexpected patterns or anomalies.</code></pre>
+<p>A study was conducted to determine how… Code</p>
+<p>Code</p>
+<p>state abb region population total Alabama AL South 4779736 135 Alaska AK West 710231 19 Arizona AZ West 6392017 232 Arkansas AR South 2915918 93 California CA West 37253956 1257 Colorado CO West 5029196 65 Code</p>
+<p>Modeling and Results</p>
+<pre><code>Explain your data preprocessing and cleaning steps.
+
+Present your key findings in a clear and concise manner.
+
+Use visuals to support your claims.
+
+Tell a story about what the data reveals.</code></pre>
+<p>Conclusion</p>
+<pre><code>Summarize your key findings.
+
+Discuss the implications of your results.</code></pre>
+
+
 </section>
 
 </main> <!-- /main -->
