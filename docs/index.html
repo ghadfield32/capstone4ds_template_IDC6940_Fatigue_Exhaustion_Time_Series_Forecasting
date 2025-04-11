@@ -244,13 +244,40 @@ Controls the information output to the next hidden state.</p></li>
 <h2 class="anchored" data-anchor-id="data-description">Data Description</h2>
 <p>The dataset utilized in this project comprises biomechanical and simulated physiological data collected from a Basketball Player from SPL Open Biomech dataset. Data was gathered during basketball shooting trials, incorporating joint-level biomechanical metrics and simulated physiological signals.</p>
 <p>Key features derived in this project include:</p>
-<p>Joint Metrics: Aggregated joint energy and power are computed to serve as primary indicators of physical output.</p>
+<section id="engineered-metrics" class="level5">
+<h5 class="anchored" data-anchor-id="engineered-metrics">Engineered Metrics</h5>
+<p>X metrix: Joint Metrics: Aggregated joint energy and power are computed to serve as primary indicators of physical output.</p>
 <p>Simulated Physiological Measures: A simulated heart rate is calculated as a function of mean and joint energy. In addition, “fake body” metrics (sleep quality, sleep duration, resting heart rate, heart rate variability, and stress index) are introduced to mimic wearable sensor data.</p>
 <p>Temporal Dynamics: Lag features (e.g., previous trial exhaustion) and rolling statistics (moving averages, volatility measures) capture trends across trials. The trial exhaustion rate is defined as the change in exhaustion per trial.</p>
 <p>Asymmetry Features: Differences between left and right joint metrics are measured to detect imbalances that may predispose athletes to injury.</p>
-<p>Workout Simulation</p>
-<p>To mimic the progression of fatigue:</p>
-<p>Workout: Contains the original 125 trials.</p>
+<p>y metrics: ‘by_trial_exhaustion_score’: “Exhaustion score normalized within each trial, calculated as cumulative energy divided by maximum energy in the trial.”, ‘joint_energy_by_trial_exhaustion_score’: “Normalized exhaustion score for a specific joint within a trial, scaled to the maximum trial energy.”, data[‘exhaustion_rate’] = data[‘by_trial_exhaustion_score’].diff() / data[‘by_trial_time’].diff() data[‘injury_risk’] = (data[‘rolling_exhaustion’] &gt; safe_expanding_quantile(data[‘rolling_exhaustion’])).astype(int)</p>
+<p>y_metrics chosen: Regression: exhaustion_rate Went with how quickly fatigue builds up over time, exhaustion_rate being more relevant than the overall “snapshot” of fatigue for a trial, by_trial_exhaustion_score Classification: Injury_risk Went with a optional but dangerous percentile (.75) of the rolling exhaustion to show and forecast moments when there is injury_risk</p>
+<p>functions for above: def calculate_by_trial_energy(df, energy_columns, debug=False): ““” Calculates energy metrics (by-trial and overall) and exhaustion scores. ““” step_name = “Calculating by-trial energy and exhaustion scores” df_before = df.copy()</p>
+<pre><code>new_columns = ['by_trial_energy', 'by_trial_exhaustion_score',
+               'overall_cumulative_energy', 'overall_exhaustion_score']
+
+# By-trial energy
+df['by_trial_energy'] = df.groupby('trial_id')['total_energy'].cumsum()
+# By-trial exhaustion score
+df['by_trial_exhaustion_score'] = (
+    df.groupby('trial_id')['by_trial_energy']
+    .transform(lambda x: x / x.max())
+)
+
+# Overall cumulative energy
+df['overall_cumulative_energy'] = df['total_energy'].cumsum()
+max_overall_cumulative_energy = df['overall_cumulative_energy'].max()
+df['overall_exhaustion_score'] = (
+    df['overall_cumulative_energy'] / max_overall_cumulative_energy
+)
+
+df_after = df.copy()
+
+_print_debug_info(df_before, df_after, new_columns, step_name, debug)
+
+return df</code></pre>
+<p>def safe_expanding_quantile(s): return s.expanding().quantile(0.75).shift().fillna(0)</p>
+<p>Dataset contains 125 trials.</p>
 <ul>
 <li><strong>Joint Metrics:</strong>
 <ul>
@@ -260,11 +287,11 @@ Controls the information output to the next hidden state.</p></li>
 <li><strong>Simulated Physiological Metrics:</strong>
 <ul>
 <li>Simulated Heart Rate (beats per minute, range: 60–180 bpm)</li>
-<li>Sleep Quality (index score, range: 0–100)</li>
-<li>Sleep Duration (hours, range: 4–10 hrs)</li>
-<li>Resting Heart Rate (beats per minute, range: 40–70 bpm)</li>
-<li>Heart Rate Variability (milliseconds, range: 20–150 ms)</li>
-<li>Stress Index (index score, range: 0–100)</li>
+</ul></li>
+<li><strong>Physical Traits</strong> (for categorical handling)
+<ul>
+<li>Player weight</li>
+<li>Player height</li>
 </ul></li>
 <li><strong>Temporal Features:</strong>
 <ul>
@@ -277,178 +304,50 @@ Controls the information output to the next hidden state.</p></li>
 </ul></li>
 </ul>
 </section>
+</section>
 <section id="analysis-and-results" class="level2">
 <h2 class="anchored" data-anchor-id="analysis-and-results">Analysis and Results</h2>
 <section id="descriptive-statistics" class="level5">
 <h5 class="anchored" data-anchor-id="descriptive-statistics">Descriptive Statistics</h5>
-<p>Descriptive Statistics: Variable Type Mean Std Dev<br>
-0 joint_energy float64 1.346318 9.144608e-01<br>
-1 joint_power float64 20.153438 1.250285e+01<br>
-2 energy_acceleration float64 -11458.531869 1.333065e+05<br>
-3 hip_asymmetry float64 0.004024 6.579138e-03<br>
-4 wrist_asymmetry float64 0.022392 2.180127e-02<br>
-5 rolling_power_std float64 3.349565 3.234210e+00<br>
-6 rolling_hr_mean float64 61.079085 5.164486e-01<br>
-7 rolling_energy_std float64 0.203486 3.885164e-01<br>
-8 simulated_HR float64 61.079297 5.498151e-01<br>
-9 player_height_in_meters float64 1.910000 0.000000e+00<br>
-10 player_weight__in_kg float64 90.700000 4.263389e-14<br>
-11 by_trial_exhaustion_score float64 0.450268 2.666154e-01<br>
-12 injury_risk int32 0.274897 4.464764e-01</p>
-<pre><code>         Min        Max  </code></pre>
-<p>0 0.000000e+00 49.115825<br>
-1 0.000000e+00 60.832273<br>
-2 -2.189662e+06 0.072830<br>
-3 0.000000e+00 0.184738<br>
-4 0.000000e+00 0.244317<br>
-5 6.141516e-02 17.383747<br>
-6 6.009147e+01 63.641281<br>
-7 2.190869e-03 19.403572<br>
-8 6.000000e+01 75.117490<br>
-9 1.910000e+00 1.910000<br>
-10 9.070000e+01 90.700000<br>
-11 0.000000e+00 1.000000<br>
-12 0.000000e+00 1.000000</p>
-<p><img src="images/corr_by_trial_exhaustion_score.png" alt="A descriptive alt text" style="width:50%; display:block; margin: 0 auto;"></p>
-<p>Correlation matrix for ‘by_trial_exhaustion_score’ with selected features: joint_energy joint_power energy_acceleration<br>
-joint_energy 1.000000 0.909506 0.126557<br>
-joint_power 0.909506 1.000000 0.138562<br>
-energy_acceleration 0.126557 0.138562 1.000000<br>
-hip_asymmetry 0.337483 0.271547 0.052571<br>
-wrist_asymmetry 0.298441 0.313432 0.088292<br>
-rolling_power_std 0.131956 0.144989 -0.173823<br>
-rolling_hr_mean 0.580720 0.622465 -0.075317<br>
-rolling_energy_std 0.219730 0.063468 -0.085464<br>
-simulated_HR 0.721382 0.699768 0.168744<br>
-player_height_in_meters NaN NaN NaN<br>
-player_weight__in_kg NaN NaN NaN<br>
-by_trial_exhaustion_score 0.305779 0.338143 0.145175</p>
-<pre><code>                       hip_asymmetry  wrist_asymmetry  rolling_power_std  \</code></pre>
-<p>joint_energy 0.337483 0.298441 0.131956<br>
-joint_power 0.271547 0.313432 0.144989<br>
-energy_acceleration 0.052571 0.088292 -0.173823<br>
-hip_asymmetry 1.000000 0.060808 0.013738<br>
-wrist_asymmetry 0.060808 1.000000 0.180543<br>
-rolling_power_std 0.013738 0.180543 1.000000<br>
-rolling_hr_mean -0.023484 0.324528 0.346268<br>
-rolling_energy_std 0.092390 0.095367 0.497836<br>
-simulated_HR -0.000801 0.343949 0.212884<br>
-player_height_in_meters NaN NaN NaN<br>
-player_weight__in_kg NaN NaN NaN<br>
-by_trial_exhaustion_score -0.232607 0.268138 0.202155</p>
-<pre><code>                       rolling_hr_mean  rolling_energy_std  simulated_HR  \</code></pre>
-<p>joint_energy 0.580720 0.219730 0.721382<br>
-joint_power 0.622465 0.063468 0.699768<br>
-energy_acceleration -0.075317 -0.085464 0.168744<br>
-hip_asymmetry -0.023484 0.092390 -0.000801<br>
-wrist_asymmetry 0.324528 0.095367 0.343949<br>
-rolling_power_std 0.346268 0.497836 0.212884<br>
-rolling_hr_mean 1.000000 0.238044 0.919149<br>
-rolling_energy_std 0.238044 1.000000 0.174079<br>
-simulated_HR 0.919149 0.174079 1.000000<br>
-player_height_in_meters NaN NaN NaN<br>
-player_weight__in_kg NaN NaN NaN<br>
-by_trial_exhaustion_score 0.865287 0.088595 0.879951</p>
-<pre><code>                       player_height_in_meters  player_weight__in_kg  \</code></pre>
-<p>joint_energy NaN NaN<br>
-joint_power NaN NaN<br>
-energy_acceleration NaN NaN<br>
-hip_asymmetry NaN NaN<br>
-wrist_asymmetry NaN NaN<br>
-rolling_power_std NaN NaN<br>
-rolling_hr_mean NaN NaN<br>
-rolling_energy_std NaN NaN<br>
-simulated_HR NaN NaN<br>
-player_height_in_meters NaN NaN<br>
-player_weight__in_kg NaN NaN<br>
-by_trial_exhaustion_score NaN NaN</p>
-<pre><code>                       by_trial_exhaustion_score  </code></pre>
-<p>joint_energy 0.305779<br>
-joint_power 0.338143<br>
-energy_acceleration 0.145175<br>
-hip_asymmetry -0.232607<br>
-wrist_asymmetry 0.268138<br>
-rolling_power_std 0.202155<br>
-rolling_hr_mean 0.865287<br>
-rolling_energy_std 0.088595<br>
-simulated_HR 0.879951<br>
-player_height_in_meters NaN<br>
-player_weight__in_kg NaN<br>
-by_trial_exhaustion_score 1.000000</p>
-<p>Correlation matrix for ‘injury_risk’ with selected features: joint_energy joint_power energy_acceleration<br>
-joint_energy 1.000000 0.909506 0.126557<br>
-joint_power 0.909506 1.000000 0.138562<br>
-energy_acceleration 0.126557 0.138562 1.000000<br>
-hip_asymmetry 0.337483 0.271547 0.052571<br>
-wrist_asymmetry 0.298441 0.313432 0.088292<br>
-rolling_power_std 0.131956 0.144989 -0.173823<br>
-rolling_hr_mean 0.580720 0.622465 -0.075317<br>
-rolling_energy_std 0.219730 0.063468 -0.085464<br>
-simulated_HR 0.721382 0.699768 0.168744<br>
-player_height_in_meters NaN NaN NaN<br>
-player_weight__in_kg NaN NaN NaN<br>
-injury_risk 0.366639 0.404424 -0.139607</p>
-<pre><code>                     hip_asymmetry  wrist_asymmetry  rolling_power_std  \</code></pre>
-<p>joint_energy 0.337483 0.298441 0.131956<br>
-joint_power 0.271547 0.313432 0.144989<br>
-energy_acceleration 0.052571 0.088292 -0.173823<br>
-hip_asymmetry 1.000000 0.060808 0.013738<br>
-wrist_asymmetry 0.060808 1.000000 0.180543<br>
-rolling_power_std 0.013738 0.180543 1.000000<br>
-rolling_hr_mean -0.023484 0.324528 0.346268<br>
-rolling_energy_std 0.092390 0.095367 0.497836<br>
-simulated_HR -0.000801 0.343949 0.212884<br>
-player_height_in_meters NaN NaN NaN<br>
-player_weight__in_kg NaN NaN NaN<br>
-injury_risk 0.077084 0.236727 0.365599</p>
-<pre><code>                     rolling_hr_mean  rolling_energy_std  simulated_HR  \</code></pre>
-<p>joint_energy 0.580720 0.219730 0.721382<br>
-joint_power 0.622465 0.063468 0.699768<br>
-energy_acceleration -0.075317 -0.085464 0.168744<br>
-hip_asymmetry -0.023484 0.092390 -0.000801<br>
-wrist_asymmetry 0.324528 0.095367 0.343949<br>
-rolling_power_std 0.346268 0.497836 0.212884<br>
-rolling_hr_mean 1.000000 0.238044 0.919149<br>
-rolling_energy_std 0.238044 1.000000 0.174079<br>
-simulated_HR 0.919149 0.174079 1.000000<br>
-player_height_in_meters NaN NaN NaN<br>
-player_weight__in_kg NaN NaN NaN<br>
-injury_risk 0.652248 0.169955 0.543222</p>
-<pre><code>                     player_height_in_meters  player_weight__in_kg  \</code></pre>
-<p>joint_energy NaN NaN<br>
-joint_power NaN NaN<br>
-energy_acceleration NaN NaN<br>
-hip_asymmetry NaN NaN<br>
-wrist_asymmetry NaN NaN<br>
-rolling_power_std NaN NaN<br>
-rolling_hr_mean NaN NaN<br>
-rolling_energy_std NaN NaN<br>
-simulated_HR NaN NaN<br>
-player_height_in_meters NaN NaN<br>
-player_weight__in_kg NaN NaN<br>
-injury_risk NaN NaN</p>
-<pre><code>                     injury_risk  </code></pre>
-<p>joint_energy 0.366639<br>
-joint_power 0.404424<br>
-energy_acceleration -0.139607<br>
-hip_asymmetry 0.077084<br>
-wrist_asymmetry 0.236727<br>
-rolling_power_std 0.365599<br>
-rolling_hr_mean 0.652248<br>
-rolling_energy_std 0.169955<br>
-simulated_HR 0.543222<br>
-player_height_in_meters NaN<br>
-player_weight__in_kg NaN<br>
-injury_risk 1.000000</p>
-<p>Feature Importance for target ‘by_trial_exhaustion_score’: Feature Perm_Importance SHAP_Importance 8 simulated_HR 1.386061 0.199147 6 rolling_hr_mean 0.454274 0.077322 0 joint_energy 0.109296 0.045438 1 joint_power 0.031813 0.023560 2 energy_acceleration 0.003993 0.002480 4 wrist_asymmetry 0.001665 0.002465 7 rolling_energy_std 0.000693 0.001707 5 rolling_power_std 0.000639 0.002280 3 hip_asymmetry 0.000099 0.000205 9 player_height_in_meters 0.000000 0.000000 10 player_weight__in_kg 0.000000 0.000000</p>
-<p>Feature Importance for target ‘injury_risk’: Feature Perm_Importance SHAP_Importance 6 rolling_hr_mean 1.079943 0.278289 8 simulated_HR 0.541816 0.082835 0 joint_energy 0.154789 0.028769 1 joint_power 0.145825 0.028232 2 energy_acceleration 0.072137 0.022768 5 rolling_power_std 0.056597 0.023569 7 rolling_energy_std 0.042963 0.015189 4 wrist_asymmetry 0.011434 0.004545 3 hip_asymmetry 0.002956 0.003068 9 player_height_in_meters 0.000000 0.000000 10 player_weight__in_kg 0.000000 0.000000</p>
+<p>(change the below to a qmd table format) Descriptive Statistics: Variable Type Mean Std Dev Min Max joint_energy float64 1.346318 0.914461 0.000000 49.115825 joint_power float64 20.153438 12.502850 0.000000 60.832273 energy_acceleration float64 -11458.53 133306.5 -2189662.0 0.072830 hip_asymmetry float64 0.004024 0.006579 0.000000 0.184738 wrist_asymmetry float64 0.022392 0.021801 0.000000 0.244317 rolling_power_std float64 3.349565 3.234210 0.061415 17.383747 rolling_hr_mean float64 61.079085 0.516449 60.09147 63.641281 rolling_energy_std float64 0.203486 0.388516 0.002191 19.403572 simulated_HR float64 61.079297 0.549815 60.000000 75.117490 player_height_in_meters float64 1.910000 0.000000 1.910000 1.910000 player_weight__in_kg float64 90.700000 4.263389e-14 90.700000 90.700000 by_trial_exhaustion_score float64 0.450268 0.266615 0.000000 1.000000 injury_risk int32 0.274897 0.446476 0.000000 1.000000</p>
+</section>
+<section id="check-for-multicollinearity-variables" class="level5">
+<h5 class="anchored" data-anchor-id="check-for-multicollinearity-variables">Check for Multicollinearity Variables</h5>
+<p>x metrics: solution: we should combine or remove or review feature importance to ensure they are needed: - joint_energy and joint_power: The correlation is 0.909506 -method: dropping Joint energy because it has less correlation than - rolling_hr_mean and simulated_HR: The correlation is 0.919149</p>
+<p>joint_energy and joint_power (correlation: 0.909506)</p>
+<p>For by_trial_exhaustion_score:</p>
+<pre><code>joint_energy has higher importance (Perm: 0.109296, SHAP: 0.045438) than joint_power (Perm: 0.031813, SHAP: 0.023560)</code></pre>
+<p>For injury_risk:</p>
+<pre><code>Both features have similar importance values, with joint_energy slightly higher (Perm: 0.154789, SHAP: 0.028769) compared to joint_power (Perm: 0.145825, SHAP: 0.028232)</code></pre>
+<p>rolling_hr_mean and simulated_HR (correlation: 0.919149)</p>
+<p>For by_trial_exhaustion_score:</p>
+<pre><code>simulated_HR has significantly higher importance (Perm: 1.386061, SHAP: 0.199147) than rolling_hr_mean (Perm: 0.454274, SHAP: 0.077322)</code></pre>
+<p>For injury_risk:</p>
+<pre><code>rolling_hr_mean has higher importance (Perm: 1.079943, SHAP: 0.278289) than simulated_HR (Perm: 0.541816, SHAP: 0.082835)</code></pre>
+<ol type="1">
+<li>For joint_energy and joint_power:</li>
+</ol>
+<p>Unlike the initial suggestion, the data shows that joint_energy actually has higher importance for both target variables. Given this contradiction with the original recommendation:</p>
+<pre><code>Keep joint_energy since it has higher importance metrics for both targets</code></pre>
+<ol start="2" type="1">
+<li>For rolling_hr_mean and simulated_HR:</li>
+</ol>
+<p>These features show target-dependent importance, which complicates the decision:</p>
+<pre><code>For by_trial_exhaustion_score: Keep simulated_HR (drop rolling_hr_mean)
+
+For injury_risk: Keep rolling_hr_mean (drop simulated_HR)</code></pre>
+<p>x to y metrics: correlation: - by_trial_exhaustion_score shows high correlations with rolling_hr_mean (0.865287) and simulated_HR (0.879951)</p>
+<p><img src="images/corr_matrix.png" alt="Correlation matrix for LSTM Regression y_var= by_trial_exhaustion_score and injury_risk" style="width:100%; display:block; margin: 0 auto;"></p>
+<p><img src="images/shap_importance_injury_risk.png" alt="Perm and SHAP importance for Regression Model Forecasting Injury Risk" style="width:100%; display:block; margin: 0 auto;"></p>
+<p><img src="images/permutation_importance_injury_risk.png" alt="Perm and SHAP importance for Regression Model Forecasting Injury Risk" style="width:100%; display:block; margin: 0 auto;"></p>
+<p><img src="images/shap_importance_exhaustion_rate.png" alt="Perm and SHAP importance for Regression Model Forecasting Exhaustion Rate" style="width:100%; display:block; margin: 0 auto;"></p>
+<p><img src="images/permutation_importance_exhaustion_rate.png" alt="Perm and SHAP importance for Regression Model Forecasting Exhaustion Rate" style="width:100%; display:block; margin: 0 auto;"></p>
 </section>
 <section id="data-visualizations" class="level5">
 <h5 class="anchored" data-anchor-id="data-visualizations">Data Visualizations</h5>
 <ul>
-<li>Histogram distributions for joint metrics.</li>
-<li>Scatter plots showing correlation between physiological metrics and fatigue rates.</li>
-<li>Temporal trend lines visualizing progression across trials.</li>
+<li><p>Histogram distributions for joint metrics. <img src="images/histograms.png" alt="Joint Histograms" style="width:100%; display:block; margin: 0 auto;"></p></li>
+<li><p>Scatter plots showing correlation between physiological metrics and fatigue rates. <img src="images/scatter_plot_exhaustion_score.png" alt="Joint  by Exhaustion Rate Scatter Plot" style="width:100%; display:block; margin: 0 auto;"></p></li>
 </ul>
 </section>
 <section id="modeling-and-results" class="level5">
