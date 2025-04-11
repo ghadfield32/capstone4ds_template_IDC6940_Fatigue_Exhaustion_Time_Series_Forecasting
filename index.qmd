@@ -6,240 +6,158 @@ format: html
 editor: visual
 ---
 
-
 ## Introduction
 
-Fatigue and injury risk modeling have become pivotal in sports analytics, particularly for basketball players. Predicting fatigue levels and assessing injury risk help in optimizing training programs and enhancing athlete longevity. Long Short-Term Memory (LSTM) networks, a type of Recurrent Neural Network (RNN), offer significant potential due to their ability to capture temporal patterns and sequential dependencies, critical in physiological and biomechanical data analysis.
+Fatigue and injury risk modeling are essential components of modern sports analytics, especially for basketball athletes. Accurately predicting fatigue levels and injury risks can significantly optimize training, enhance performance, and prolong athlete careers. Long Short-Term Memory (LSTM) networks—a specialized type of Recurrent Neural Network (RNN)—are well-suited to capturing sequential and temporal patterns inherent in physiological and biomechanical athlete data.
 
-Recent developments have showcased that fatigue accumulation can directly impact injury susceptibility, highlighting the importance of accurately modeling temporal fatigue progression. This project aims to leverage LSTM models to effectively forecast fatigue levels and predict joint injury risks in basketball players, contributing valuable insights for injury prevention strategies and optimized athletic performance.
+Recent studies underline the critical link between fatigue accumulation and increased injury risk, emphasizing the need for precise temporal modeling. This capstone project employs LSTM models to forecast fatigue levels (`exhaustion_rate`) and classify joint injury risks (`injury_risk`) during basketball shooting trials. The goal is to support injury prevention strategies and optimize athletic performance using biomechanical and physiological insights.
 
-Previous research on LSTM's efficacy in fatigue modeling forms the basis of our methodological approach, emphasizing the use of biomechanical and simulated physiological data.
+Key literature informing this approach:
 
-Athlete Burnout: Research has shown that burnout is influenced by multiple factors (e.g., stress, training load, support systems) that vary among athletes. Customizing training and recovery protocols based on individual warning signs may mitigate injury risks.
+- **Athlete Burnout:** Individualized factors (stress, training load, recovery support) significantly influence injury risks, suggesting the need for personalized interventions.
+- **Fatigue Data Collection:** Datasets capturing muscle activity, biomechanics, and physiological fatigue indicators serve as foundational resources.
+- **Methodological Advances:**  
+  - Fatigue modeling using neural networks: [DOI: 10.1016/j.engfracmech.2020.107402](https://doi.org/10.1016/j.engfracmech.2020.107402)  
+  - Injury risk forecasting via combined metrics: [DOI: 10.52082/jssm.2024.537](https://doi.org/10.52082/jssm.2024.537)
 
-Fatigue Data Collection: Detailed datasets have been published to capture muscle activity, motion capture data, and self-reported fatigue levels during shoulder rotations. These resources serve as a foundation for building predictive algorithms.
-
-Methodological Advances: Recent studies have applied neural network architectures to model fatigue—such as a fully-connected network for predicting crack growth in metals [DOI: 10.1016/j.engfracmech.2020.107402]—and used combined physical and physiological workload metrics to forecast injury risk in professional soccer players [DOI: 10.52082/jssm.2024.537].
+---
 
 ## Methods
 
-##### LSTM (Long Short-Term Memory) Networks
+### LSTM (Long Short-Term Memory) Networks
 
-Long Short-Term Memory (LSTM) networks are a specialized type of Recurrent Neural Network (RNN) designed to overcome the vanishing gradient problem that typically hinders standard RNNs when modeling long-term dependencies. Unlike traditional RNNs, LSTMs utilize gating mechanisms to selectively retain or discard information over sequences.
-
-The core components of an LSTM cell include:
+LSTMs effectively address issues of vanishing gradients typical in traditional RNNs. Their gating mechanisms enable capturing long-term dependencies crucial in sequential physiological and biomechanical data:
 
 - **Forget Gate:**  
   $$f_t = \sigma(W_f \cdot [h_{t-1}, x_t] + b_f)$$  
-  Determines which information to remove from the cell state.
 
 - **Input Gate:**  
   $$i_t = \sigma(W_i \cdot [h_{t-1}, x_t] + b_i)$$  
   $$\tilde{C}_t = \tanh(W_C \cdot [h_{t-1}, x_t] + b_C)$$  
-  Decides which new candidate values to add to the cell state.
 
 - **Cell State Update:**  
-  $$C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$$
+  $$C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$$  
 
 - **Output Gate:**  
   $$o_t = \sigma(W_o \cdot [h_{t-1}, x_t] + b_o)$$  
   $$h_t = o_t \odot \tanh(C_t)$$  
-  Controls the information output to the next hidden state.
 
-Here, \( W \) and \( b \) represent weights and biases, respectively, \( \sigma \) is the sigmoid function, and \( \odot \) is element-wise multiplication.
+*(*where \( W \) and \( b \) represent weights and biases, \( \sigma \) is the sigmoid function, and \( \odot \) denotes element-wise multiplication.*)*
 
-Compared to standard RNNs, LSTMs are especially effective in handling data with temporal correlations—making them suitable for modeling fatigue progression and injury risk in sequential biomechanical and physiological data.
+### Preprocessing Approaches
 
-##### Preprocessing Options: 
-Sequencing into categories of different lengths causing us to test DTW vs Pad vs set_window to understand what would be the best option for handling this data 
+- Evaluating optimal sequence handling via:
+  - **Dynamic Time Warping (DTW)**
+  - **Padding sequences**
+  - **Windowing methods** (`set_window`)
 
-
-
+---
 
 ## Data Description
 
-The dataset utilized in this project comprises biomechanical and simulated physiological data collected from a Basketball Player from SPL Open Biomech dataset. Data was gathered during basketball shooting trials, incorporating joint-level biomechanical metrics and simulated physiological signals.
+The SPL Open Biomechanics dataset provides biomechanical and simulated physiological data from **125 basketball shooting trials**.
 
-Key features derived in this project include:
+### Features (X metrics)
 
-##### Engineered Metrics
-X metrix:
-Joint Metrics: Aggregated joint energy and power are computed to serve as primary indicators of physical output.
+- **Joint Metrics:**  
+  - **Joint Energy:** Joules (range: 50–250 J)  
+  - **Joint Power:** Watts (range: 100–1000 W)
 
-Simulated Physiological Measures: A simulated heart rate is calculated as a function of mean and joint energy. In addition, “fake body” metrics (sleep quality, sleep duration, resting heart rate, heart rate variability, and stress index) are introduced to mimic wearable sensor data.
+- **Simulated Physiological Metrics:**  
+  - **Simulated Heart Rate:** beats per minute (range: 60–180 bpm)  
+  - **Simulated wearable metrics:** sleep quality/duration, resting heart rate, HR variability, stress index
 
-Temporal Dynamics: Lag features (e.g., previous trial exhaustion) and rolling statistics (moving averages, volatility measures) capture trends across trials. The trial exhaustion rate is defined as the change in exhaustion per trial.
+- **Temporal Dynamics:**  
+  - **Exhaustion Rate per trial:** rate of exhaustion accumulation  
+  - **Rolling averages and lagged exhaustion features**
 
-Asymmetry Features: Differences between left and right joint metrics are measured to detect imbalances that may predispose athletes to injury.
+- **Asymmetry Features:**  
+  - **Left/right joint energy and power differences:** (range: -50 to 50 J)
 
+- **Physical Traits (categorical handling):**  
+  - **Player Height**  
+  - **Player Weight**
 
-y metrics:
-'by_trial_exhaustion_score': "Exhaustion score normalized within each trial, calculated as cumulative energy divided by maximum energy in the trial.",
-'joint_energy_by_trial_exhaustion_score': "Normalized exhaustion score for a specific joint within a trial, scaled to the maximum trial energy.",
-data['exhaustion_rate'] = data['by_trial_exhaustion_score'].diff() / data['by_trial_time'].diff()
+### Target Variables (Y metrics)
+
+- **Regression target (`exhaustion_rate`):**  
+  Measures how rapidly fatigue accumulates over time—more actionable than the snapshot-style `by_trial_exhaustion_score`.
+
+  ```python
+  data['exhaustion_rate'] = data['by_trial_exhaustion_score'].diff() / data['by_trial_time'].diff()
+
+    Classification target (injury_risk):
+    A binary flag indicating risk moments when rolling exhaustion surpasses the 75th percentile threshold.
+
 data['injury_risk'] = (data['rolling_exhaustion'] > safe_expanding_quantile(data['rolling_exhaustion'])).astype(int)
-
-
-y_metrics chosen: 
-  Regression: exhaustion_rate
-    Went with how quickly fatigue builds up over time, exhaustion_rate being more relevant than the overall “snapshot” of fatigue for a trial, by_trial_exhaustion_score
-  Classification: Injury_risk 
-    Went with a optional but dangerous percentile (.75) of the rolling exhaustion to show and forecast moments when there is injury_risk
-
-functions for above: 
-def calculate_by_trial_energy(df, energy_columns, debug=False):
-    """
-    Calculates energy metrics (by-trial and overall) and exhaustion scores.
-    """
-    step_name = "Calculating by-trial energy and exhaustion scores"
-    df_before = df.copy()
-
-    new_columns = ['by_trial_energy', 'by_trial_exhaustion_score',
-                   'overall_cumulative_energy', 'overall_exhaustion_score']
-
-    # By-trial energy
-    df['by_trial_energy'] = df.groupby('trial_id')['total_energy'].cumsum()
-    # By-trial exhaustion score
-    df['by_trial_exhaustion_score'] = (
-        df.groupby('trial_id')['by_trial_energy']
-        .transform(lambda x: x / x.max())
-    )
-
-    # Overall cumulative energy
-    df['overall_cumulative_energy'] = df['total_energy'].cumsum()
-    max_overall_cumulative_energy = df['overall_cumulative_energy'].max()
-    df['overall_exhaustion_score'] = (
-        df['overall_cumulative_energy'] / max_overall_cumulative_energy
-    )
-
-    df_after = df.copy()
-
-    _print_debug_info(df_before, df_after, new_columns, step_name, debug)
-
-    return df
 
 def safe_expanding_quantile(s):
     return s.expanding().quantile(0.75).shift().fillna(0)
 
+Energy Calculations:
 
-Dataset contains 125 trials.
+    def calculate_by_trial_energy(df, energy_columns, debug=False):
+        df['by_trial_energy'] = df.groupby('trial_id')['total_energy'].cumsum()
+        df['by_trial_exhaustion_score'] = df.groupby('trial_id')['by_trial_energy'].transform(lambda x: x / x.max())
+        return df
 
-
-- **Joint Metrics:**
-  - Joint Energy (Joules, range: 50–250 J)
-  - Joint Power (Watts, range: 100–1000 W)
-
-- **Simulated Physiological Metrics:**
-  - Simulated Heart Rate (beats per minute, range: 60–180 bpm)
-
-- **Physical Traits** (for categorical handling)
-  - Player weight
-  - Player height 
-
-- **Temporal Features:**
-  - Trial Exhaustion Rate (dimensionless, normalized between 0–1)
-  - Lag and rolling average features derived from trials
-
-- **Asymmetry Features:**
-  - Differences between left/right joints (Joules, range: -50 to 50 J)
-
-
-
-
-
-## Analysis and Results
-
-##### Descriptive Statistics
-
-(change the below to a qmd table format)
-Descriptive Statistics:
+Analysis and Results
+Descriptive Statistics
 Variable	Type	Mean	Std Dev	Min	Max
-joint_energy	float64	1.346318	0.914461	0.000000	49.115825
-joint_power	float64	20.153438	12.502850	0.000000	60.832273
-energy_acceleration	float64	-11458.53	133306.5	-2189662.0	0.072830
-hip_asymmetry	float64	0.004024	0.006579	0.000000	0.184738
-wrist_asymmetry	float64	0.022392	0.021801	0.000000	0.244317
-rolling_power_std	float64	3.349565	3.234210	0.061415	17.383747
-rolling_hr_mean	float64	61.079085	0.516449	60.09147	63.641281
-rolling_energy_std	float64	0.203486	0.388516	0.002191	19.403572
-simulated_HR	float64	61.079297	0.549815	60.000000	75.117490
-player_height_in_meters	float64	1.910000	0.000000	1.910000	1.910000
-player_weight__in_kg	float64	90.700000	4.263389e-14	90.700000	90.700000
-by_trial_exhaustion_score	float64	0.450268	0.266615	0.000000	1.000000
-injury_risk	int32	0.274897	0.446476	0.000000	1.000000
+joint_energy	float64	1.346	0.914	0.000	49.116
+joint_power	float64	20.153	12.503	0.000	60.832
+energy_acceleration	float64	-11458.532	133306.500	-2189662.00	0.073
+hip_asymmetry	float64	0.004	0.007	0.000	0.185
+wrist_asymmetry	float64	0.022	0.022	0.000	0.244
+rolling_power_std	float64	3.350	3.234	0.061	17.384
+rolling_hr_mean	float64	61.079	0.516	60.091	63.641
+rolling_energy_std	float64	0.203	0.389	0.002	19.404
+simulated_HR	float64	61.079	0.550	60.000	75.117
+player_height_in_meters	float64	1.910	0.000	1.910	1.910
+player_weight_in_kg	float64	90.700	0.000	90.700	90.700
+by_trial_exhaustion_score	float64	0.450	0.267	0.000	1.000
+injury_risk	int32	0.275	0.446	0.000	1.000
+Multicollinearity Assessment & Feature Selection
+Highly Correlated Features (Action Taken)
 
+    Joint Energy vs Joint Power (corr = 0.909506):
 
+        Action: Retain joint_energy for both regression and classification due to consistently higher importance.
 
-##### Check for Multicollinearity Variables
-x metrics:
-solution: we should combine or remove or review feature importance to ensure they are needed:
-  - joint_energy and joint_power: The correlation is 0.909506 
-    -method: dropping Joint energy because it has less correlation than 
-  - rolling_hr_mean and simulated_HR: The correlation is 0.919149
+    Rolling HR Mean vs Simulated HR (corr = 0.919149):
 
-joint_energy and joint_power (correlation: 0.909506)
+        Regression (exhaustion_rate): Retain simulated_HR (higher importance).
 
-For by_trial_exhaustion_score:
+        Classification (injury_risk): Retain rolling_hr_mean (higher importance).
 
-    joint_energy has higher importance (Perm: 0.109296, SHAP: 0.045438) than joint_power (Perm: 0.031813, SHAP: 0.023560)
+Correlation & Feature Importance Visualizations
 
-For injury_risk:
-
-    Both features have similar importance values, with joint_energy slightly higher (Perm: 0.154789, SHAP: 0.028769) compared to joint_power (Perm: 0.145825, SHAP: 0.028232)
-
-rolling_hr_mean and simulated_HR (correlation: 0.919149)
-
-For by_trial_exhaustion_score:
-
-    simulated_HR has significantly higher importance (Perm: 1.386061, SHAP: 0.199147) than rolling_hr_mean (Perm: 0.454274, SHAP: 0.077322)
-
-For injury_risk:
-
-    rolling_hr_mean has higher importance (Perm: 1.079943, SHAP: 0.278289) than simulated_HR (Perm: 0.541816, SHAP: 0.082835)
-1. For joint_energy and joint_power:
-
-Unlike the initial suggestion, the data shows that joint_energy actually has higher importance for both target variables. Given this contradiction with the original recommendation:
-
-    Keep joint_energy since it has higher importance metrics for both targets
-
-
-2. For rolling_hr_mean and simulated_HR:
-
-These features show target-dependent importance, which complicates the decision:
-
-    For by_trial_exhaustion_score: Keep simulated_HR (drop rolling_hr_mean)
-
-    For injury_risk: Keep rolling_hr_mean (drop simulated_HR)
-
-
-
-x to y metrics:
-correlation:
-  - by_trial_exhaustion_score shows high correlations with rolling_hr_mean (0.865287) and simulated_HR (0.879951)
-
-
+Correlation Matrix
 <img src="images/corr_matrix.png" alt="Correlation matrix for LSTM Regression y_var= by_trial_exhaustion_score and injury_risk" style="width:100%; display:block; margin: 0 auto;" />
 
+Feature Importance: Injury Risk
 
-<img src="images/shap_importance_injury_risk.png" alt="Perm and SHAP importance for Regression Model Forecasting Injury Risk" style="width:100%; display:block; margin: 0 auto;" />
+  SHAP Importance:
+  <img src="images/shap_importance_injury_risk.png" alt="Perm and SHAP importance for Regression Model Forecasting Injury Risk" style="width:100%; display:block; margin: 0 auto;" />
 
-<img src="images/permutation_importance_injury_risk.png" alt="Perm and SHAP importance for Regression Model Forecasting Injury Risk" style="width:100%; display:block; margin: 0 auto;" />
+  Permutation Importance:
+  <img src="images/permutation_importance_injury_risk.png" alt="Perm and SHAP importance for Regression Model Forecasting Injury Risk" style="width:100%; display:block; margin: 0 auto;" />
 
+Feature Importance: Exhaustion Rate
 
-<img src="images/shap_importance_exhaustion_rate.png" alt="Perm and SHAP importance for Regression Model Forecasting Exhaustion Rate" style="width:100%; display:block; margin: 0 auto;" />
+  SHAP Importance:
+  <img src="images/shap_importance_exhaustion_rate.png" alt="Perm and SHAP importance for Regression Model Forecasting Exhaustion Rate" style="width:100%; display:block; margin: 0 auto;" />
 
-<img src="images/permutation_importance_exhaustion_rate.png" alt="Perm and SHAP importance for Regression Model Forecasting Exhaustion Rate" style="width:100%; display:block; margin: 0 auto;" />
+  Permutation Importance:
+  <img src="images/permutation_importance_exhaustion_rate.png" alt="Perm and SHAP importance for Regression Model Forecasting Exhaustion Rate" style="width:100%; display:block; margin: 0 auto;" />
 
+Data Visualizations
 
-##### Data Visualizations
+  Histogram Distributions for Joint Metrics:
+  <img src="images/histograms.png" alt="Joint Histograms" style="width:100%; display:block; margin: 0 auto;" />
 
-- Histogram distributions for joint metrics.
-<img src="images/histograms.png" alt="Joint Histograms" style="width:100%; display:block; margin: 0 auto;" />
-
-- Scatter plots showing correlation between physiological metrics and fatigue rates.
-<img src="images/scatter_plot_exhaustion_score.png" alt="Joint  by Exhaustion Rate Scatter Plot" style="width:100%; display:block; margin: 0 auto;" />
-
-
+  Scatter Plots (Physiological Metrics vs Fatigue Rates):
+  <img src="images/scatter_plot_exhaustion_score.png" alt="Joint by Exhaustion Rate Scatter Plot" style="width:100%; display:block; margin: 0 auto;" />
 
 
 
