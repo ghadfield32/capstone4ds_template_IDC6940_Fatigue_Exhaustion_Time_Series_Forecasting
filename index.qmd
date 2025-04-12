@@ -66,7 +66,7 @@ Our preprocessing workflow follows a systematic approach:
      - Rolling windows for pattern detection
      - Lagged variables for time-series analysis
      - Rate calculations for progression tracking
-   
+   - Clipped physiological metrics (joint_exhaustion_rates) with minimum of 0
    - Biomechanical Indices:
      - Joint asymmetry scores
      - Energy expenditure calculations
@@ -74,8 +74,19 @@ Our preprocessing workflow follows a systematic approach:
 
 3. **Data Preparation**
    - Normalization of input features
-   - Sequence preparation for temporal models
-   - Train/test split with temporal consideration
+   - Encoding ordinal categorical variables and one-hot encoding for nominal variables
+
+4. **Sequence Handling Evaluation**
+   Reasoning:
+      - Shooting phases are of different lengths for near term predictions on the granular level and sequences need to be the same length so I automated a datapreprocessor (ghadfield32/ml_preprocessor) for automatically handling and evaluating different sequence handling methods.
+
+      Methods:
+      - Dynamic Time Warping (DTW) for sequence alignment
+      - Padding sequences to uniform length
+      - Windowing methods (`set_window`) for temporal segmentation
+
+
+
 
 # Model Architecture
 
@@ -155,7 +166,7 @@ Our Shot Phase Aggregated Model achieved remarkable results:
 
 ## Injury Risk Classification
 
-The Trial Aggregated Model demonstrated exceptional performance:
+The Trial Aggregated Injury Risk Model demonstrated exceptional performance:
 
 - Accuracy: 95.0%
 - Precision: 95.0%
@@ -163,6 +174,15 @@ The Trial Aggregated Model demonstrated exceptional performance:
 - F1 Score: 97.4%
 
 ![Injury Risk Forecast](images/trial_agg_injury_forecast.png)
+
+The Overall Injury Risk Model demonstrated less good metrics but better forecasting:
+
+- Accuracy: 88.9%
+- Precision: 83.1%
+- Recall: 78.9%
+- F1 Score: 80.9%
+
+![Injury Risk Forecast](images/overall_injury_forecast.png)
 
 ### Model Analysis
 - High sensitivity to injury risk patterns

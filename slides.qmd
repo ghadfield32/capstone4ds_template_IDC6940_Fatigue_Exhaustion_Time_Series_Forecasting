@@ -298,11 +298,10 @@ Core LSTM Mathematics:
 
 
 ### Preprocessing Approaches
-
+- Checked z-score for suspicious variables
 - Clipped physiological metrics (joint_exhaustion_rates) with minimum of 0
 - Scaling numerical features
-- filtering low null columns and imputing higher volume nulls
-- checked z-score for suspicious variables
+- Filtering low null columns and imputing higher volume nulls
 
 
 
@@ -391,6 +390,16 @@ Core LSTM Mathematics:
 
  <img src="images/trial_agg_injury_forecast.png" alt="Trial Exhaustion Rate Forecast" style="width:100%; display:block; margin: 0 auto;" />
 
+  The Overall Injury Risk Model demonstrated less good metrics but better forecasting:
+
+  - Accuracy: 88.9%
+  - Precision: 83.1%
+  - Recall: 78.9%
+  - F1 Score: 80.9%
+
+ <img src="images/overall_injury_forecast.png" alt="Trial Exhaustion Rate Forecast" style="width:100%; display:block; margin: 0 auto;" />
+
+ 
   Classification Alternative:
     - Tree Based Modeling: rRandomForest, CatBoost,and XGBoost would be better for this data due to:
       - Non Linearity
