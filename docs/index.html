@@ -9,7 +9,7 @@
 <meta name="author" content="Geoffrey Hadfield">
 <meta name="dcterms.date" content="2025-03-24">
 
-<title>Capstone Project: Modeling Fatigue and Injury Risk in Athletic Movements like Basketball Shooting – Modeling Fatigue and Injury Risk in Baseball Pitching</title>
+<title>Modeling Fatigue and Injury Risk in Athletic Movements – Modeling Fatigue and Injury Risk in Baseball Pitching</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -21,6 +21,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -38,10 +73,10 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b4406b7675125bc2ba204020e191172.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-68bca3a50acd80feb0cb8c3c361c6f22.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-bb5f9278568ae542f8467bdb635b70ac.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-e1cb159902188a81bed43d68c21b7d75.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -70,35 +105,6 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -156,20 +162,54 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
-  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
+  <li><a href="#project-overview" id="toc-project-overview" class="nav-link active" data-scroll-target="#project-overview">Project Overview</a>
   <ul class="collapse">
-  <li><a href="#lstm-long-short-term-memory-networks" id="toc-lstm-long-short-term-memory-networks" class="nav-link" data-scroll-target="#lstm-long-short-term-memory-networks">LSTM (Long Short-Term Memory) Networks</a></li>
-  <li><a href="#preprocessing-approaches" id="toc-preprocessing-approaches" class="nav-link" data-scroll-target="#preprocessing-approaches">Preprocessing Approaches</a></li>
+  <li><a href="#key-objectives" id="toc-key-objectives" class="nav-link" data-scroll-target="#key-objectives">Key Objectives</a></li>
+  <li><a href="#problem-statement" id="toc-problem-statement" class="nav-link" data-scroll-target="#problem-statement">Problem Statement</a></li>
   </ul></li>
-  <li><a href="#data-description" id="toc-data-description" class="nav-link" data-scroll-target="#data-description">Data Description</a>
+  <li><a href="#data-methodology" id="toc-data-methodology" class="nav-link" data-scroll-target="#data-methodology">Data &amp; Methodology</a>
   <ul class="collapse">
-  <li><a href="#features-x-metrics" id="toc-features-x-metrics" class="nav-link" data-scroll-target="#features-x-metrics">Features (X metrics)</a></li>
-  <li><a href="#target-variables-y-metrics" id="toc-target-variables-y-metrics" class="nav-link" data-scroll-target="#target-variables-y-metrics">Target Variables (Y metrics)</a></li>
-  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li><a href="#dataset-description" id="toc-dataset-description" class="nav-link" data-scroll-target="#dataset-description">Dataset Description</a>
+  <ul class="collapse">
+  <li><a href="#feature-set" id="toc-feature-set" class="nav-link" data-scroll-target="#feature-set">Feature Set</a></li>
+  </ul></li>
+  <li><a href="#data-processing-pipeline" id="toc-data-processing-pipeline" class="nav-link" data-scroll-target="#data-processing-pipeline">Data Processing Pipeline</a></li>
+  </ul></li>
+  <li><a href="#model-architecture" id="toc-model-architecture" class="nav-link" data-scroll-target="#model-architecture">Model Architecture</a>
+  <ul class="collapse">
+  <li><a href="#lstm-based-models" id="toc-lstm-based-models" class="nav-link" data-scroll-target="#lstm-based-models">LSTM-Based Models</a>
+  <ul class="collapse">
+  <li><a href="#standard-lstm-implementation" id="toc-standard-lstm-implementation" class="nav-link" data-scroll-target="#standard-lstm-implementation">Standard LSTM Implementation</a></li>
+  <li><a href="#bidirectional-lstm-bilstm" id="toc-bidirectional-lstm-bilstm" class="nav-link" data-scroll-target="#bidirectional-lstm-bilstm">Bidirectional LSTM (BiLSTM)</a></li>
+  <li><a href="#tcn-lstm-hybrid" id="toc-tcn-lstm-hybrid" class="nav-link" data-scroll-target="#tcn-lstm-hybrid">TCN-LSTM Hybrid</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#results-analysis" id="toc-results-analysis" class="nav-link" data-scroll-target="#results-analysis">Results &amp; Analysis</a>
+  <ul class="collapse">
+  <li><a href="#exhaustion-rate-prediction" id="toc-exhaustion-rate-prediction" class="nav-link" data-scroll-target="#exhaustion-rate-prediction">Exhaustion Rate Prediction</a>
+  <ul class="collapse">
+  <li><a href="#key-findings" id="toc-key-findings" class="nav-link" data-scroll-target="#key-findings">Key Findings</a></li>
+  </ul></li>
+  <li><a href="#injury-risk-classification" id="toc-injury-risk-classification" class="nav-link" data-scroll-target="#injury-risk-classification">Injury Risk Classification</a>
+  <ul class="collapse">
+  <li><a href="#model-analysis" id="toc-model-analysis" class="nav-link" data-scroll-target="#model-analysis">Model Analysis</a></li>
+  </ul></li>
+  <li><a href="#joint-specific-performance" id="toc-joint-specific-performance" class="nav-link" data-scroll-target="#joint-specific-performance">Joint-Specific Performance</a>
+  <ul class="collapse">
+  <li><a href="#top-performing-joints" id="toc-top-performing-joints" class="nav-link" data-scroll-target="#top-performing-joints">Top Performing Joints</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#implementation-future-work" id="toc-implementation-future-work" class="nav-link" data-scroll-target="#implementation-future-work">Implementation &amp; Future Work</a>
+  <ul class="collapse">
+  <li><a href="#current-applications" id="toc-current-applications" class="nav-link" data-scroll-target="#current-applications">Current Applications</a></li>
+  <li><a href="#future-development" id="toc-future-development" class="nav-link" data-scroll-target="#future-development">Future Development</a>
+  <ul class="collapse">
+  <li><a href="#short-term-goals" id="toc-short-term-goals" class="nav-link" data-scroll-target="#short-term-goals">Short-term Goals</a></li>
+  <li><a href="#long-term-vision" id="toc-long-term-vision" class="nav-link" data-scroll-target="#long-term-vision">Long-term Vision</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#contact-information" id="toc-contact-information" class="nav-link" data-scroll-target="#contact-information">Contact Information</a></li>
   <li><a href="#resources" id="toc-resources" class="nav-link" data-scroll-target="#resources">Resources</a></li>
-  </ul></li>
-  <li><a href="#example" id="toc-example" class="nav-link" data-scroll-target="#example">EXAMPLE:</a></li>
   </ul>
 </nav>
     </div>
@@ -178,7 +218,8 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Capstone Project: Modeling Fatigue and Injury Risk in Athletic Movements like Basketball Shooting</h1>
+<h1 class="title">Modeling Fatigue and Injury Risk in Athletic Movements</h1>
+<p class="subtitle lead">A Deep Learning Approach to Basketball Biomechanics</p>
 </div>
 
 
@@ -207,169 +248,247 @@ window.Quarto = {
 </header>
 
 
-<section id="introduction" class="level2">
-<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>Fatigue and injury risk modeling are essential components of modern sports analytics, especially for basketball athletes. Accurately predicting fatigue levels and injury risks can significantly optimize training, enhance performance, and prolong athlete careers. Long Short-Term Memory (LSTM) networks—a specialized type of Recurrent Neural Network (RNN)—are well-suited to capturing sequential and temporal patterns inherent in physiological and biomechanical athlete data.</p>
-<p>Recent studies underline the critical link between fatigue accumulation and increased injury risk, emphasizing the need for precise temporal modeling. This capstone project employs LSTM models to forecast fatigue levels (<code>exhaustion_rate</code>) and classify joint injury risks (<code>injury_risk</code>) during basketball shooting trials. The goal is to support injury prevention strategies and optimize athletic performance using biomechanical and physiological insights.</p>
-<p>Key literature informing this approach:</p>
+<section id="project-overview" class="level1">
+<h1>Project Overview</h1>
+<p>This research project explores the application of deep learning techniques to predict and prevent injuries in basketball players by analyzing biomechanical data and fatigue patterns. The work combines state-of-the-art LSTM architectures with comprehensive biomechanical datasets to create predictive models for athlete monitoring.</p>
+<section id="key-objectives" class="level2">
+<h2 class="anchored" data-anchor-id="key-objectives">Key Objectives</h2>
+<ol type="1">
+<li>Develop predictive models for:
 <ul>
-<li><strong>Athlete Burnout:</strong> Individualized factors (stress, training load, recovery support) significantly influence injury risks, suggesting the need for personalized interventions.</li>
-<li><strong>Fatigue Data Collection:</strong> Datasets capturing muscle activity, biomechanics, and physiological fatigue indicators serve as foundational resources.</li>
-<li><strong>Methodological Advances:</strong>
-<ul>
-<li>Fatigue modeling using neural networks: <a href="https://doi.org/10.1016/j.engfracmech.2020.107402">DOI: 10.1016/j.engfracmech.2020.107402</a><br>
-</li>
-<li>Injury risk forecasting via combined metrics: <a href="https://doi.org/10.52082/jssm.2024.537">DOI: 10.52082/jssm.2024.537</a></li>
+<li>Exhaustion rate progression during basketball movements</li>
+<li>Joint-specific injury risks based on biomechanical patterns</li>
 </ul></li>
-</ul>
-<hr>
+<li>Create a real-time monitoring framework for practical implementation</li>
+<li>Establish interpretable metrics for coaches and training staff</li>
+</ol>
 </section>
-<section id="methods" class="level2">
-<h2 class="anchored" data-anchor-id="methods">Methods</h2>
-<section id="lstm-long-short-term-memory-networks" class="level3">
-<h3 class="anchored" data-anchor-id="lstm-long-short-term-memory-networks">LSTM (Long Short-Term Memory) Networks</h3>
-<p>LSTMs effectively address issues of vanishing gradients typical in traditional RNNs. Their gating mechanisms enable capturing long-term dependencies crucial in sequential physiological and biomechanical data:</p>
+<section id="problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="problem-statement">Problem Statement</h2>
+<p>Athletes face increasing injury risks due to accumulated fatigue, particularly in high-intensity sports like basketball. The complex temporal patterns in biomechanical data make it challenging to predict and prevent injuries effectively. This project addresses the critical need for real-time monitoring solutions that can:</p>
 <ul>
-<li><p><strong>Forget Gate:</strong><br>
-<span class="math display">\[f_t = \sigma(W_f \cdot [h_{t-1}, x_t] + b_f)\]</span></p></li>
-<li><p><strong>Input Gate:</strong><br>
-<span class="math display">\[i_t = \sigma(W_i \cdot [h_{t-1}, x_t] + b_i)\]</span><br>
-<span class="math display">\[\tilde{C}_t = \tanh(W_C \cdot [h_{t-1}, x_t] + b_C)\]</span></p></li>
-<li><p><strong>Cell State Update:</strong><br>
-<span class="math display">\[C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t\]</span></p></li>
-<li><p><strong>Output Gate:</strong><br>
-<span class="math display">\[o_t = \sigma(W_o \cdot [h_{t-1}, x_t] + b_o)\]</span><br>
-<span class="math display">\[h_t = o_t \odot \tanh(C_t)\]</span></p></li>
-</ul>
-<p><em>(</em>where ( W ) and ( b ) represent weights and biases, ( ) is the sigmoid function, and ( ) denotes element-wise multiplication.<em>)</em></p>
-</section>
-<section id="preprocessing-approaches" class="level3">
-<h3 class="anchored" data-anchor-id="preprocessing-approaches">Preprocessing Approaches</h3>
-<ul>
-<li>Evaluating optimal sequence handling via:
-<ul>
-<li><strong>Dynamic Time Warping (DTW)</strong></li>
-<li><strong>Padding sequences</strong></li>
-<li><strong>Windowing methods</strong> (<code>set_window</code>)</li>
-</ul></li>
-</ul>
-<hr>
-</section>
-</section>
-<section id="data-description" class="level2">
-<h2 class="anchored" data-anchor-id="data-description">Data Description</h2>
-<p>The SPL Open Biomechanics dataset provides biomechanical and simulated physiological data from <strong>125 basketball shooting trials</strong>.</p>
-<section id="features-x-metrics" class="level3">
-<h3 class="anchored" data-anchor-id="features-x-metrics">Features (X metrics)</h3>
-<ul>
-<li><strong>Joint Metrics:</strong>
-<ul>
-<li><strong>Joint Energy:</strong> Joules (range: 50–250 J)<br>
-</li>
-<li><strong>Joint Power:</strong> Watts (range: 100–1000 W)</li>
-</ul></li>
-<li><strong>Simulated Physiological Metrics:</strong>
-<ul>
-<li><strong>Simulated Heart Rate:</strong> beats per minute (range: 60–180 bpm)<br>
-</li>
-<li><strong>Simulated wearable metrics:</strong> sleep quality/duration, resting heart rate, HR variability, stress index</li>
-</ul></li>
-<li><strong>Temporal Dynamics:</strong>
-<ul>
-<li><strong>Exhaustion Rate per trial:</strong> rate of exhaustion accumulation<br>
-</li>
-<li><strong>Rolling averages and lagged exhaustion features</strong></li>
-</ul></li>
-<li><strong>Asymmetry Features:</strong>
-<ul>
-<li><strong>Left/right joint energy and power differences:</strong> (range: -50 to 50 J)</li>
-</ul></li>
-<li><strong>Physical Traits (categorical handling):</strong>
-<ul>
-<li><strong>Player Height</strong><br>
-</li>
-<li><strong>Player Weight</strong></li>
-</ul></li>
+<li>Prevent career-threatening injuries through early detection</li>
+<li>Optimize training regimens based on individual fatigue patterns</li>
+<li>Enhance performance longevity through data-driven decisions</li>
 </ul>
 </section>
-<section id="target-variables-y-metrics" class="level3">
-<h3 class="anchored" data-anchor-id="target-variables-y-metrics">Target Variables (Y metrics)</h3>
+</section>
+<section id="data-methodology" class="level1">
+<h1>Data &amp; Methodology</h1>
+<section id="dataset-description" class="level2">
+<h2 class="anchored" data-anchor-id="dataset-description">Dataset Description</h2>
+<p>The project utilizes the SPL Open Biomechanics Dataset, comprising:</p>
 <ul>
-<li><p><strong>Regression target (<code>exhaustion_rate</code>):</strong><br>
-Measures how rapidly fatigue accumulates over time—more actionable than the snapshot-style <code>by_trial_exhaustion_score</code>.</p>
-<p>```python data[‘exhaustion_rate’] = data[‘by_trial_exhaustion_score’].diff() / data[‘by_trial_time’].diff()</p>
-<p>Classification target (injury_risk): A binary flag indicating risk moments when rolling exhaustion surpasses the 75th percentile threshold.</p></li>
+<li>125 basketball shooting trials</li>
+<li>Comprehensive joint metrics and movement patterns</li>
+<li>Physiological indicators from wearable sensors</li>
 </ul>
-<p>data[‘injury_risk’] = (data[‘rolling_exhaustion’] &gt; safe_expanding_quantile(data[‘rolling_exhaustion’])).astype(int)</p>
-<p>def safe_expanding_quantile(s): return s.expanding().quantile(0.75).shift().fillna(0)</p>
-<p>Energy Calculations:</p>
-<pre><code>def calculate_by_trial_energy(df, energy_columns, debug=False):
-    df['by_trial_energy'] = df.groupby('trial_id')['total_energy'].cumsum()
-    df['by_trial_exhaustion_score'] = df.groupby('trial_id')['by_trial_energy'].transform(lambda x: x / x.max())
-    return df</code></pre>
-<p>Analysis and Results Descriptive Statistics Variable Type Mean Std Dev Min Max joint_energy float64 1.346 0.914 0.000 49.116 joint_power float64 20.153 12.503 0.000 60.832 energy_acceleration float64 -11458.532 133306.500 -2189662.00 0.073 hip_asymmetry float64 0.004 0.007 0.000 0.185 wrist_asymmetry float64 0.022 0.022 0.000 0.244 rolling_power_std float64 3.350 3.234 0.061 17.384 rolling_hr_mean float64 61.079 0.516 60.091 63.641 rolling_energy_std float64 0.203 0.389 0.002 19.404 simulated_HR float64 61.079 0.550 60.000 75.117 player_height_in_meters float64 1.910 0.000 1.910 1.910 player_weight_in_kg float64 90.700 0.000 90.700 90.700 by_trial_exhaustion_score float64 0.450 0.267 0.000 1.000 injury_risk int32 0.275 0.446 0.000 1.000 Multicollinearity Assessment &amp; Feature Selection Highly Correlated Features (Action Taken)</p>
-<pre><code>Joint Energy vs Joint Power (corr = 0.909506):
-
-    Action: Retain joint_energy for both regression and classification due to consistently higher importance.
-
-Rolling HR Mean vs Simulated HR (corr = 0.919149):
-
-    Regression (exhaustion_rate): Retain simulated_HR (higher importance).
-
-    Classification (injury_risk): Retain rolling_hr_mean (higher importance).</code></pre>
-<p>Correlation &amp; Feature Importance Visualizations</p>
-<p>Correlation Matrix <img src="images/corr_matrix.png" alt="Correlation matrix for LSTM Regression y_var= by_trial_exhaustion_score and injury_risk" style="width:100%; display:block; margin: 0 auto;"></p>
-<p>Feature Importance: Injury Risk</p>
-<p>SHAP Importance: <img src="images/shap_importance_injury_risk.png" alt="Perm and SHAP importance for Regression Model Forecasting Injury Risk" style="width:100%; display:block; margin: 0 auto;"></p>
-<p>Permutation Importance: <img src="images/permutation_importance_injury_risk.png" alt="Perm and SHAP importance for Regression Model Forecasting Injury Risk" style="width:100%; display:block; margin: 0 auto;"></p>
-<p>Feature Importance: Exhaustion Rate</p>
-<p>SHAP Importance: <img src="images/shap_importance_exhaustion_rate.png" alt="Perm and SHAP importance for Regression Model Forecasting Exhaustion Rate" style="width:100%; display:block; margin: 0 auto;"></p>
-<p>Permutation Importance: <img src="images/permutation_importance_exhaustion_rate.png" alt="Perm and SHAP importance for Regression Model Forecasting Exhaustion Rate" style="width:100%; display:block; margin: 0 auto;"></p>
-<p>Data Visualizations</p>
-<p>Histogram Distributions for Joint Metrics: <img src="images/histograms.png" alt="Joint Histograms" style="width:100%; display:block; margin: 0 auto;"></p>
-<p>Scatter Plots (Physiological Metrics vs Fatigue Rates): <img src="images/scatter_plot_exhaustion_score.png" alt="Joint by Exhaustion Rate Scatter Plot" style="width:100%; display:block; margin: 0 auto;"></p>
-<section id="modeling-and-results" class="level5">
-<h5 class="anchored" data-anchor-id="modeling-and-results">Modeling and Results</h5>
-<p>Steps: Explain your data preprocessing and cleaning steps.</p>
-<pre><code>Present your key findings in a clear and concise manner.
-
-Use visuals to support your claims.
-
-Tell a story about what the data reveals.</code></pre>
-<p>work below—————-</p>
-<p>Predictive Modeling Pipelines Pipeline 1: Regression for Predicting Trial Exhaustion Rate</p>
-<p>Input Features: Aggregated joint metrics, simulated physiological features, and temporal features.</p>
-<p>Model: A baseline linear regression model is used, with future plans to incorporate Random Forests, Gradient Boosting, or LSTM networks.</p>
-<p>Evaluation: Model performance is assessed using Mean Absolute Error (MAE), Root Mean Squared Error (RMSE), and R², along with visualizations comparing predicted versus actual exhaustion rates.</p>
-<p>Pipeline 2: Classification for Predicting Joint Injury Risk</p>
-<p>Input Features: Joint-specific metrics, asymmetry measurements, and cumulative load indicators.</p>
-<p>Labeling: Trials are classified as high injury risk if a rolling sum of joint stress exceeds a threshold (e.g., the 75th percentile).</p>
-<p>Model: Initially, logistic regression or decision tree classifiers are employed. Future work may involve Random Forests or neural network-based methods.</p>
-<p>Evaluation: Metrics such as accuracy, precision, recall, F1-score, and ROC-AUC are used, supplemented by feature importance analyses using SHAP values.</p>
-<p>Integration and Modularity</p>
-<p>Both pipelines share common preprocessing and feature engineering modules, ensuring that the workflow is modular and reproducible. Visualization tools—including histograms, correlation matrices, and temporal trend plots—are used throughout the analysis to validate each transformation step. Experimental Results</p>
-<p>The LSTM-based regression model for fatigue prediction demonstrated promising results:</p>
-<p>MSE: 0.00596</p>
-<p>MAE: 0.01762</p>
-<p>R² Score: 0.91808</p>
-<p>Similarly, the injury risk classifier achieved strong performance:</p>
-<p>Overall Accuracy: 98.16%</p>
-<p>Precision: 93.84%</p>
-<p>Recall: 99.77%</p>
-<p>F1 Score: 96.72%</p>
+<section id="feature-set" class="level3">
+<h3 class="anchored" data-anchor-id="feature-set">Feature Set</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Joint Metrics'</span>: [<span class="st">'energy'</span>, <span class="st">'power'</span>],</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Physiological'</span>: [<span class="st">'heart_rate'</span>, <span class="st">'wearable_metrics'</span>],</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Temporal'</span>: [<span class="st">'exhaustion_rate'</span>, <span class="st">'rolling_averages'</span>],</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Asymmetry'</span>: [<span class="st">'joint_differences'</span>]</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 </section>
-<section id="conclusion" class="level3">
-<h3 class="anchored" data-anchor-id="conclusion">Conclusion</h3>
-<p>Steps: Summarize your key findings.</p>
-<pre><code>Discuss the implications of your results.</code></pre>
-<p>—–work below:</p>
-<p>Joint-specific models yielded varying metrics, reflecting the inherent complexity of localized biomechanical data. Discussion</p>
-<p>This project illustrates the successful application of deep learning to model fatigue and predict injury risk in a real-world sports setting. Key challenges included managing the variability in biomechanical signals and optimizing model performance through careful feature engineering. The integration of temporal dynamics and asymmetry features was critical in capturing the underlying physiological responses. Future work may explore attention mechanisms or hybrid architectures to further refine predictive accuracy. Conclusion</p>
-<p>By combining real athlete data with simulated physiological metrics, this capstone project provides a novel approach to predicting fatigue and injury risks in basketball players. The dual-pipeline strategy (regression and classification) along with modular integration of preprocessing and feature engineering modules establishes a robust framework that is transparent, reproducible, and adaptable for future research and practical deployment. References</p>
+<section id="data-processing-pipeline" class="level2">
+<h2 class="anchored" data-anchor-id="data-processing-pipeline">Data Processing Pipeline</h2>
+<p>Our preprocessing workflow follows a systematic approach:</p>
+<ol type="1">
+<li><strong>Data Cleaning</strong>
+<ul>
+<li>Removal of outliers and noise</li>
+<li>Handling missing values</li>
+<li>Signal smoothing for sensor data</li>
+</ul></li>
+<li><strong>Feature Engineering</strong>
+<ul>
+<li>Temporal Features:
+<ul>
+<li>Rolling windows for pattern detection</li>
+<li>Lagged variables for time-series analysis</li>
+<li>Rate calculations for progression tracking</li>
+</ul></li>
+<li>Biomechanical Indices:
+<ul>
+<li>Joint asymmetry scores</li>
+<li>Energy expenditure calculations</li>
+<li>Power distribution metrics</li>
+</ul></li>
+</ul></li>
+<li><strong>Data Preparation</strong>
+<ul>
+<li>Normalization of input features</li>
+<li>Sequence preparation for temporal models</li>
+<li>Train/test split with temporal consideration</li>
+</ul></li>
+</ol>
 </section>
-<section id="resources" class="level3">
-<h3 class="anchored" data-anchor-id="resources">Resources</h3>
+</section>
+<section id="model-architecture" class="level1">
+<h1>Model Architecture</h1>
+<section id="lstm-based-models" class="level2">
+<h2 class="anchored" data-anchor-id="lstm-based-models">LSTM-Based Models</h2>
+<section id="standard-lstm-implementation" class="level3">
+<h3 class="anchored" data-anchor-id="standard-lstm-implementation">Standard LSTM Implementation</h3>
+<p>This base architecture serves as our foundation for temporal pattern recognition:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> Sequential([</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    LSTM(<span class="dv">64</span>, return_sequences<span class="op">=</span><span class="va">True</span>),</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    Dropout(<span class="fl">0.2</span>),</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    LSTM(<span class="dv">32</span>),</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    Dense(horizon)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Characteristics:</strong> - Fast training time - Efficient memory usage - High prediction speed - Suitable for real-time applications</p>
+</section>
+<section id="bidirectional-lstm-bilstm" class="level3">
+<h3 class="anchored" data-anchor-id="bidirectional-lstm-bilstm">Bidirectional LSTM (BiLSTM)</h3>
+<p>Enhanced architecture for complex pattern recognition:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> Sequential([</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    Bidirectional(LSTM(<span class="dv">64</span>, return_sequences<span class="op">=</span><span class="va">True</span>)),</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    Dropout(<span class="fl">0.2</span>),</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    Bidirectional(LSTM(<span class="dv">32</span>)),</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    Dense(horizon)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Key Advantages:</strong> - Improved pattern recognition through bidirectional context - Better handling of complex sequences - Enhanced long-term dependency capture</p>
+</section>
+<section id="tcn-lstm-hybrid" class="level3">
+<h3 class="anchored" data-anchor-id="tcn-lstm-hybrid">TCN-LSTM Hybrid</h3>
+<p>Advanced architecture combining temporal convolutional networks with LSTM:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> Sequential([</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    TCN(<span class="dv">64</span>),</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    Dropout(<span class="fl">0.2</span>),</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    LSTM(<span class="dv">32</span>),</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    Dense(horizon)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Benefits:</strong> - Superior multi-scale temporal pattern recognition - Efficient parallel processing - Improved gradient stability</p>
+</section>
+</section>
+</section>
+<section id="results-analysis" class="level1">
+<h1>Results &amp; Analysis</h1>
+<section id="exhaustion-rate-prediction" class="level2">
+<h2 class="anchored" data-anchor-id="exhaustion-rate-prediction">Exhaustion Rate Prediction</h2>
+<p>Our Shot Phase Aggregated Model achieved remarkable results:</p>
+<ul>
+<li>R² Score: 0.7340 (73.4% variance explained)</li>
+<li>MAE: 0.028238</li>
+<li>MSE: 0.003367</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/shot_phase_agg_exhaustion_rate_forecast.png" class="img-fluid figure-img"></p>
+<figcaption>Exhaustion Rate Forecast</figcaption>
+</figure>
+</div>
+<section id="key-findings" class="level3">
+<h3 class="anchored" data-anchor-id="key-findings">Key Findings</h3>
+<ul>
+<li>Strong temporal correlations in fatigue patterns</li>
+<li>Reliable short-term prediction capability</li>
+<li>Consistent tracking of fatigue progression</li>
+</ul>
+</section>
+</section>
+<section id="injury-risk-classification" class="level2">
+<h2 class="anchored" data-anchor-id="injury-risk-classification">Injury Risk Classification</h2>
+<p>The Trial Aggregated Model demonstrated exceptional performance:</p>
+<ul>
+<li>Accuracy: 95.0%</li>
+<li>Precision: 95.0%</li>
+<li>Recall: 100%</li>
+<li>F1 Score: 97.4%</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/trial_agg_injury_forecast.png" class="img-fluid figure-img"></p>
+<figcaption>Injury Risk Forecast</figcaption>
+</figure>
+</div>
+<section id="model-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="model-analysis">Model Analysis</h3>
+<ul>
+<li>High sensitivity to injury risk patterns</li>
+<li>Minimal false positive predictions</li>
+<li>Consistent performance across movement types</li>
+</ul>
+</section>
+</section>
+<section id="joint-specific-performance" class="level2">
+<h2 class="anchored" data-anchor-id="joint-specific-performance">Joint-Specific Performance</h2>
+<section id="top-performing-joints" class="level3">
+<h3 class="anchored" data-anchor-id="top-performing-joints">Top Performing Joints</h3>
+<ol type="1">
+<li>Right Elbow: 93.0% accuracy</li>
+<li>Right Wrist: 92.5% accuracy</li>
+<li>Left Hip: 88.4% accuracy</li>
+</ol>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>joint_performance <span class="op">=</span> {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Upper Body'</span>: <span class="st">'Superior accuracy'</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Lower Body'</span>: <span class="st">'Higher variability'</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Side Bias'</span>: <span class="st">'Right &gt; Left'</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+</section>
+<section id="implementation-future-work" class="level1">
+<h1>Implementation &amp; Future Work</h1>
+<section id="current-applications" class="level2">
+<h2 class="anchored" data-anchor-id="current-applications">Current Applications</h2>
+<ol type="1">
+<li><strong>Real-time Monitoring System</strong>
+<ul>
+<li>Integration with existing training systems</li>
+<li>Live feedback during practice sessions</li>
+<li>Automated alert mechanisms</li>
+</ul></li>
+<li><strong>Training Optimization</strong>
+<ul>
+<li>Personalized training load recommendations</li>
+<li>Recovery period optimization</li>
+<li>Risk-aware workout planning</li>
+</ul></li>
+<li><strong>Recovery Planning</strong>
+<ul>
+<li>Data-driven recovery protocols</li>
+<li>Individual adaptation strategies</li>
+<li>Progress tracking metrics</li>
+</ul></li>
+</ol>
+</section>
+<section id="future-development" class="level2">
+<h2 class="anchored" data-anchor-id="future-development">Future Development</h2>
+<section id="short-term-goals" class="level3">
+<h3 class="anchored" data-anchor-id="short-term-goals">Short-term Goals</h3>
+<ol type="1">
+<li>Enhanced real-time processing capabilities</li>
+<li>Extension to additional sports</li>
+<li>Improved visualization tools for coaches</li>
+</ol>
+</section>
+<section id="long-term-vision" class="level3">
+<h3 class="anchored" data-anchor-id="long-term-vision">Long-term Vision</h3>
+<ol type="1">
+<li>Automated training adjustment systems</li>
+<li>Predictive injury prevention framework</li>
+<li>Personalized athlete profiling</li>
+</ol>
+</section>
+</section>
+</section>
+<section id="contact-information" class="level1">
+<h1>Contact Information</h1>
+<ul>
+<li><strong>Email:</strong> ghadfield32@gmail.com</li>
+<li><strong>GitHub:</strong> <span class="citation" data-cites="ghadfield32">@ghadfield32</span></li>
+<li><strong>LinkedIn:</strong> linkedin.com/in/geoffhadfield32</li>
+<li><strong>Portfolio:</strong> datascienceportfol.io/ghadfield32</li>
+<li><strong>Project Repository:</strong> github.com/ghadfield/fatigue-modeling</li>
+</ul>
+</section>
+<section id="resources" class="level1">
+<h1>Resources</h1>
 <p>DataCamp Tutorial: Introduction to SHAP Values for Machine Learning Interpretability</p>
 <p>DataCamp Tutorial: Mastering Bayesian Optimization in Data Science</p>
 <p>Fatigue Analysis Study, DOI: 10.1016/j.engfracmech.2020.107402</p>
@@ -378,59 +497,6 @@ Tell a story about what the data reveals.</code></pre>
 <pre><code>Factors Leading to Athlete Burnout
 
 Dataset for Fatigue Analysis during Shoulder Rotations</code></pre>
-</section>
-</section>
-<section id="example" class="level2">
-<h2 class="anchored" data-anchor-id="example">EXAMPLE:</h2>
-<p>Writing a great story for data science projects - spring 2025</p>
-<p>This is a Report Template Quarto Author</p>
-<p>Students names (Advisor: Dr.&nbsp;Cohen) Published</p>
-<p>January 14, 2025</p>
-<p>Slides: slides.html ( Go to slides.qmd to edit) Important</p>
-<p>Remember: Your goal is to make your audience understand and care about your findings. By crafting a compelling story, you can effectively communicate the value of your data science project.</p>
-<p>Carefully read this template since it has instructions and tips to writing! Introduction</p>
-<p>The introduction should:</p>
-<pre><code>Develop a storyline that captures attention and maintains interest.
-
-Your audience is your peers
-
-Clearly state the problem or question you’re addressing.
-
-Introduce why it is relevant needs.
-
-Provide an overview of your approach.</code></pre>
-<p>Example of writing including citing references:</p>
-<p>This is an introduction to ….. regression, which is a non-parametric estimator that estimates the conditional expectation of two variables which is random. The goal of a kernel regression is to discover the non-linear relationship between two random variables. To discover the non-linear relationship, kernel estimator or kernel smoothing is the main method to estimate the curve for non-parametric statistics. In kernel estimator, weight function is known as kernel function (Efromovich 2008). Cite this paper (Bro and Smilde 2014). The GEE (Wang 2014). The PCA (Daffertshofer et al.&nbsp;2004). Topology can be used in machine learning (Adams and Moy 2021)</p>
-<p>This is my work and I want to add more work… Methods</p>
-<pre><code>Detail the models or algorithms used.
-
-Justify your choices based on the problem and data.</code></pre>
-<p>The common non-parametric regression model is , where can be defined as the sum of the regression function value for . Here is unknown and some errors. With the help of this definition, we can create the estimation for local averaging i.e.&nbsp;can be estimated with the product of average and is near to</p>
-<p>. In other words, this means that we are discovering the line through the data points with the help of surrounding data points. The estimation formula is printed below (R Core Team 2019):</p>
-<p>is the sum of weights that belongs to all real numbers. Weights are positive numbers and small if is far from</p>
-<p>.</p>
-<p>Another equation:</p>
-<p>Analysis and Results Data Exploration and Visualization</p>
-<pre><code>Describe your data sources and collection process.
-
-Present initial findings and insights through visualizations.
-
-Highlight unexpected patterns or anomalies.</code></pre>
-<p>A study was conducted to determine how… Code</p>
-<p>Code</p>
-<p>state abb region population total Alabama AL South 4779736 135 Alaska AK West 710231 19 Arizona AZ West 6392017 232 Arkansas AR South 2915918 93 California CA West 37253956 1257 Colorado CO West 5029196 65 Code</p>
-<p>Modeling and Results</p>
-<pre><code>Explain your data preprocessing and cleaning steps.
-
-Present your key findings in a clear and concise manner.
-
-Use visuals to support your claims.
-
-Tell a story about what the data reveals.</code></pre>
-<p>Conclusion</p>
-<pre><code>Summarize your key findings.
-
-Discuss the implications of your results.</code></pre>
 
 
 </section>

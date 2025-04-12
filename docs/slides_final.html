@@ -225,45 +225,48 @@ Geoffrey Hadfield
 <td style="text-align: center;">- Clipped physiological metrics (joint_exhaustion_rates) with minimum of 0 - Scaling numerical features - filtering low null columns and imputing higher volume nulls - checked z-score for suspicious variables</td>
 </tr>
 <tr class="even">
+<td style="text-align: center;">- Evaluating optimal sequence handling via: - <strong>Dynamic Time Warping (DTW)</strong> - <strong>Padding sequences</strong> - <strong>Windowing methods</strong> (<code>set_window</code>)</td>
+</tr>
+<tr class="odd">
 <td style="text-align: center;">### Model Results Findings</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: center;">### Model Performance Summary</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: center;">### Training Parameters: - Epochs - 200 - Batch Size = 32 - Early Stopping Patience = 5 - lstm layers = 1 - dense_units = 1 - dropout = 0.2</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: center;">### Base Models | Model Type | MSE | MAE | R² Score | Accuracy | Precision | Recall | F1 Score | |————|—–|—–|———-|———-|———–|——–|———–| | Exhaustion Model (Base) | 0.008768 | 0.043824 | 0.7046 | - | - | - | - | | Exhaustion Model (Trial Agg.) | 0.006269 | 0.038587 | -0.0895 | - | - | - | - | | Exhaustion Model (Shot Agg.) | 0.003367 | 0.028238 | 0.7340 | - | - | - | - | | Injury Model (Base) | - | - | - | 0.889 | 0.831 | 0.789 | 0.809 | | Injury Model (Trial Agg.) | - | - | - | 0.950 | 0.950 | 1.000 | 0.974 | | Injury Model (Shot Agg.) | - | - | - | 0.726 | 0.796 | 0.709 | 0.750 | | XGBoost Injury Model | - | - | - | 0.967 | 0.962 | 0.973 | 0.967 |</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: center;">### Joint-Specific Injury_Risk Models | Joint | Accuracy | Precision | Recall | F1 Score | |——-|———-|———–|——–|———–| | L_ANKLE | 0.741 | 1.000 | 0.013 | 0.026 | | R_ANKLE | 0.775 | 0.545 | 0.655 | 0.595 | | L_WRIST | 0.871 | 0.711 | 0.858 | 0.778 | | R_WRIST | 0.925 | 0.846 | 0.878 | 0.862 | | L_ELBOW | 0.867 | 0.750 | 0.778 | 0.764 | | R_ELBOW | 0.930 | 0.934 | 0.799 | 0.861 | | L_KNEE | 0.871 | 0.892 | 0.493 | 0.635 | | R_KNEE | 0.819 | 0.698 | 0.602 | 0.647 | | L_HIP | 0.884 | 0.929 | 0.601 | 0.730 | | R_HIP | 0.818 | 0.781 | 0.520 | 0.625 |</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: center;">### Joint-Specific Exhaustion_Rate Models | Joint | MSE | MAE | R² Score | |——-|—–|—–|———-| | L_ANKLE | 0.559260 | 0.607205 | -4.086e+06 | | R_ANKLE | 0.631438 | 0.616338 | -5.579e+06 | | L_WRIST | 0.292680 | 0.480319 | -1.765e+06 | | R_WRIST | 0.399011 | 0.571976 | -2.171e+06 | | L_ELBOW | 0.291242 | 0.472093 | -1.175e+06 | | R_ELBOW | 0.484043 | 0.626293 | -1.930e+06 | | L_KNEE | 0.387772 | 0.482502 | -2.875e+06 | | R_KNEE | 0.663009 | 0.661079 | -5.447e+06 | | L_HIP | 0.492328 | 0.588739 | -2.803e+06 | | R_HIP | 0.587490 | 0.650270 | -3.469e+06 |</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: center;">### Explaination using Visuals and Feature importance to understand what features are important in each scenario</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: center;">### Exhaustion Rate Regression The best Regression model overall was our Shot Phase Aggregated Exhaustion Rate Model showing - a 0.7340 R² Score: Much better than mean and best of all models - a 0.028238 MAE: Best of all models - a 0.003367 MSE: Best of all models</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: center;"><img src="images/shot_phase_agg_exhaustion_rate_forecast.png" alt="Shot Phase Exhaustion Rate Forecast" style="width:100%; display:block; margin: 0 auto;"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: center;">Regression Alternative: - NBEATS probabilistic forecast had a slightly better MAE then our custom LSTM model above Forecast Metrics: MAE RMSE SMAPE NBEATS 0.135291 0.160437 60.513207 ExpSmoothing 0.116982 0.139461 54.443056 <img src="images/nbeats_expsmoothing_forecast.png" alt="Shot Phase Exhaustion Rate Forecast" style="width:100%; display:block; margin: 0 auto;"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: center;">### Injury Risk Classification</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: center;">The best Classification model overall was our Injury Risk Model (Trial Agg.): - 0.950 Accuracy: Best of all models - 0.950 Precision: Best of all models - 1.000 Recall: Best of all models - 0.974 F1 Score: Best of all models</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: center;"><img src="images/trial_agg_injury_forecast.png" alt="Trial Exhaustion Rate Forecast" style="width:100%; display:block; margin: 0 auto;"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: center;">Classification Alternative: - Tree Based Modeling: rRandomForest, CatBoost,and XGBoost would be better for this data due to: - Non Linearity - High Dimensionality</td>
 </tr>
 </tbody>

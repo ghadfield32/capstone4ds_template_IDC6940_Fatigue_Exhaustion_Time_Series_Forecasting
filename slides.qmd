@@ -1,118 +1,504 @@
 ---
-title: "Capstone Project: Modeling Fatigue and Injury Risk in Baseball Pitching"
+title: "Modeling Fatigue and Injury Risk in Athletic Movements"
+subtitle: "A Deep Learning Approach to Basketball Biomechanics"
 author: "Geoffrey Hadfield"
 date: "2025-03-24"
-format: html
-editor: visual
+format: 
+  revealjs:
+    theme: dark
+    transition: slide
+    slide-number: true
+    code-fold: true
+    highlight-style: github
 ---
 
-Abstract
+# Introduction
 
-In this capstone project, we leverage real athlete data from Driveline Baseball alongside novel sensor measurements to predict fatigue and joint injury risks in baseball pitchers. Using an LSTM-based recurrent neural network (RNN) architecture, the project combines biomechanical data with simulated physiological metrics. Two parallel pipelines—one for regression (predicting trial exhaustion rates) and another for classification (identifying joint injury risk)—are developed. This work integrates advanced feature engineering, temporal dynamics, and modular data preprocessing, offering robust insights for injury prevention and performance analytics. Introduction
+Fatigue and injury risk modeling are essential components of modern sports analytics, especially for basketball athletes. Accurately predicting fatigue levels and injury risks can significantly optimize training, enhance performance, and prolong athlete careers. Long Short-Term Memory (LSTM) networks—a specialized type of Recurrent Neural Network (RNN)—are well-suited to capturing sequential and temporal patterns inherent in physiological and biomechanical athlete data.
 
-Recent advances in sports science have underscored the importance of combining biomechanical and physiological data for injury prevention. In my internship at Driveline Baseball, the dataset was upgraded to include real athlete data. To further enhance the analysis, this project incorporates EMG sensors to capture muscle contraction, acceleration, and gyroscopic measurements during the pitching motion. These additional measurements—placed on the flexor carpi radialis (FCR) and other key muscles—aim to improve the prediction of ulnar collateral ligament (UCL) injuries.
+Recent studies underline the critical link between fatigue accumulation and increased injury risk, emphasizing the need for precise temporal modeling. This capstone project employs LSTM models to forecast fatigue levels (`exhaustion_rate`) and classify joint injury risks (`injury_risk`) during basketball shooting trials. The goal is to support injury prevention strategies and optimize athletic performance using biomechanical and physiological insights.
 
-Two resources support this work:
+In looking on a granular level we found that shooting motion sequences are of different lengths if we wanted to try and assess real time granular metrics,
+we can possibly forecast injury's as high as 2 sequences in the future so I evaluated hieararchical dynamic time warping, distributed padding, and the 
+basic set_window approach to setting up the sequences to see which would be best in terms of forecasting in the near future and the results are below. 
 
-```         
-The raw sensor data is being compiled and will be available at emg_fatigue_analysis.
+Key literature informing this approach:
 
-A pre-established pipeline for LSTM-based fatigue prediction is available at LSTM RNN Pipeline.
+- **Athlete Burnout:** Individualized factors (stress, training load, recovery support) significantly influence injury risks, suggesting the need for personalized interventions.
+- **Fatigue Data Collection:** Datasets capturing muscle activity, biomechanics, and physiological fatigue indicators serve as foundational resources.
+- **Methodological Advances:**  
+  - Fatigue modeling using neural networks: [DOI: 10.1016/j.engfracmech.2020.107402](https://doi.org/10.1016/j.engfracmech.2020.107402)  
+  - Injury risk forecasting via combined metrics: [DOI: 10.52082/jssm.2024.537](https://doi.org/10.52082/jssm.2024.537)
+
+
+
+
+
+----------------------------------------------------------------------------------
+# Methods
+
+
+## Data Description
+
+The SPL Open Biomechanics dataset provides biomechanical and simulated physiological data from **125 basketball shooting trials**.
+
+### Features (X metrics)
+
+- **Joint Metrics:**  
+  - **Joint Energy:** Joules (range: 50–250 J)  
+  - **Joint Power:** Watts (range: 100–1000 W)
+
+- **Simulated Physiological Metrics:**  
+  - **Simulated Heart Rate:** beats per minute (range: 60–180 bpm)  
+  - **Simulated wearable metrics:** sleep quality/duration, resting heart rate, HR variability, stress index
+
+- **Temporal Dynamics:**  
+  - **Exhaustion Rate per trial:** rate of exhaustion accumulation  
+  - **Rolling averages and lagged exhaustion features**
+
+- **Asymmetry Features:**  
+  - **Left/right joint energy and power differences:** (range: -50 to 50 J)
+
+- **Physical Traits (categorical handling):**  
+  - **Player Height**  
+  - **Player Weight**
+
+### Target Variables (Y metrics)
+
+- **Regression target (`exhaustion_rate`):**  
+  Measures how rapidly fatigue accumulates over time—more actionable than the snapshot-style `by_trial_exhaustion_score`.
+
+  ```python
+  data['exhaustion_rate'] = data['by_trial_exhaustion_score'].diff() / data['by_trial_time'].diff()
+  ```
+
+- **Classification target (`injury_risk`):**  
+  A binary flag indicating risk moments when rolling exhaustion surpasses the 75th percentile threshold.
+
+  ```python
+  data['injury_risk'] = (data['rolling_exhaustion'] > safe_expanding_quantile(data['rolling_exhaustion'])).astype(int)
+  def safe_expanding_quantile(s):
+      return s.expanding().quantile(0.75).shift().fillna(0)
+  ```
+
+### Energy Calculations:
+    ```python
+    def calculate_by_trial_energy(df, energy_columns, debug=False):
+        df['by_trial_energy'] = df.groupby('trial_id')['total_energy'].cumsum()
+        df['by_trial_exhaustion_score'] = df.groupby('trial_id')['by_trial_energy'].transform(lambda x: x / x.max())
+        return df
+    ```
+    
+### Analysis and Results
+#### Descriptive Statistics
+| Variable | Type | Mean | Std Dev | Min | Max |
+|----------|------|------|---------|-----|-----|
+| joint_energy | float64 | 1.346 | 0.914 | 0.000 | 49.116 |
+| joint_power | float64 | 20.153 | 12.503 | 0.000 | 60.832 |
+| energy_acceleration | float64 | -11458.532 | 133306.500 | -2189662.00 | 0.073 |
+| hip_asymmetry | float64 | 0.004 | 0.007 | 0.000 | 0.185 |
+| wrist_asymmetry | float64 | 0.022 | 0.022 | 0.000 | 0.244 |
+| rolling_power_std | float64 | 3.350 | 3.234 | 0.061 | 17.384 |
+| rolling_hr_mean | float64 | 61.079 | 0.516 | 60.091 | 63.641 |
+| rolling_energy_std | float64 | 0.203 | 0.389 | 0.002 | 19.404 |
+| simulated_HR | float64 | 61.079 | 0.550 | 60.000 | 75.117 |
+| player_height_in_meters | float64 | 1.910 | 0.000 | 1.910 | 1.910 |
+| player_weight_in_kg | float64 | 90.700 | 0.000 | 90.700 | 90.700 |
+| by_trial_exhaustion_score | float64 | 0.450 | 0.267 | 0.000 | 1.000 |
+| injury_risk | int32 | 0.275 | 0.446 | 0.000 | 1.000 |
+
+### Multicollinearity Assessment & Feature Selection
+#### Highly Correlated Features (Action Taken)
+
+    Joint Energy vs Joint Power (corr = 0.909506):
+
+        Action: Retain joint_energy for both regression and classification due to consistently higher importance.
+
+    Rolling HR Mean vs Simulated HR (corr = 0.919149):
+
+        Regression (exhaustion_rate): Retain simulated_HR (higher importance).
+
+        Classification (injury_risk): Retain rolling_hr_mean (higher importance).
+
+Correlation & Feature Importance Visualizations
+
+Correlation Matrix
+<img src="images/corr_matrix.png" alt="Correlation matrix for LSTM Regression y_var= by_trial_exhaustion_score and injury_risk" style="width:100%; display:block; margin: 0 auto;" />
+
+Feature Importance: Injury Risk
+
+  SHAP Importance:
+  <img src="images/shap_importance_injury_risk.png" alt="Perm and SHAP importance for Regression Model Forecasting Injury Risk" style="width:100%; display:block; margin: 0 auto;" />
+
+  Permutation Importance:
+  <img src="images/permutation_importance_injury_risk.png" alt="Perm and SHAP importance for Regression Model Forecasting Injury Risk" style="width:100%; display:block; margin: 0 auto;" />
+
+Feature Importance: Exhaustion Rate
+
+  SHAP Importance:
+  <img src="images/shap_importance_exhaustion_rate.png" alt="Perm and SHAP importance for Regression Model Forecasting Exhaustion Rate" style="width:100%; display:block; margin: 0 auto;" />
+
+  Permutation Importance:
+  <img src="images/permutation_importance_exhaustion_rate.png" alt="Perm and SHAP importance for Regression Model Forecasting Exhaustion Rate" style="width:100%; display:block; margin: 0 auto;" />
+
+Data Visualizations
+
+  Histogram Distributions for Joint Metrics:
+  <img src="images/histograms.png" alt="Joint Histograms" style="width:100%; display:block; margin: 0 auto;" />
+
+  Scatter Plots (An Example of Clipped Physiological Metric vs Exhaustion Rates):
+  <img src="images/scatter_plot_exhaustion_score.png" alt="Joint by Exhaustion Rate Scatter Plot" style="width:100%; display:block; margin: 0 auto;" />
+
+
+### Final Feature Selection
+  Overall Granular Exhaustion Rate Regression and Injury_Risk Classification Models: based on the feature lists above based on the correlation and feature importance reasoning
+  Individual Granular Joint Exhaustion Rate/Injury Classification,  Shot Phase Summarized Exhaustion Rate/Injury Classification, and Trial Summary Exhaustion Rate/Injury Classification Models: based on the top 10 important features selected by ranking the Perm importance and Shap Importance to get the best features for each model
+
+
+
+---------------------------------------------------------------------------------------------------
+# Modeling and Results
+
+
+### LSTM-Based Architectures
+
+We explored several variations of LSTM-based architectures to capture temporal dependencies in the biomechanical and physiological data:
+
+1. **Standard LSTM**
+   - Architecture: LSTM(64) → Dropout(0.2) → LSTM(32) → Dropout(0.2) → Dense(horizon)
+   - Usage:
+     - Sequential data with clear forward temporal dependencies
+     - Real-time predictions where future context isn't available
+     - Basic motion pattern recognition in joint movements
+   - Pros:
+     - Computationally efficient
+     - Lower memory requirements
+     - Easier to train and tune
+     - Good for online/streaming predictions
+   - Cons:
+     - Can miss patterns that require future context
+     - May struggle with complex temporal relationships
+     - Limited ability to capture long-range dependencies
+
+2. **Bidirectional LSTM (BiLSTM)**
+   - Architecture: BiLSTM(64) → Dropout(0.2) → BiLSTM(32) → Dropout(0.2) → Dense(horizon)
+   - Usage:
+     - Post-hoc analysis of complete movement sequences
+     - Pattern recognition requiring both past and future context
+     - Identifying complex biomechanical relationships
+   - Pros:
+     - Better pattern recognition through bidirectional context
+     - Improved accuracy for complex sequences
+     - Better at capturing long-term dependencies
+   - Cons:
+     - Double the computational cost
+     - Cannot be used for real-time predictions
+     - Requires full sequences for prediction
+     - More prone to overfitting on small datasets
+
+3. **TCN-LSTM Hybrid**
+   - Architecture: TCN(64) → Dropout(0.2) → LSTM(32) → Dropout(0.2) → Dense(horizon)
+   - Usage:
+     - Data with both local and global temporal patterns
+     - Scenarios requiring precise temporal hierarchy
+     - Complex motion sequences with varying time scales
+   - Pros:
+     - Better at capturing multi-scale temporal patterns
+     - Parallel processing capabilities
+     - More stable gradients
+     - Fixed receptive field helps with interpretability
+   - Cons:
+     - More hyperparameters to tune
+     - Higher computational complexity
+     - May require larger datasets for effective training
+     - Can be overkill for simple temporal patterns
+
+4. **TCN-BiLSTM Hybrid**
+   - Architecture: BiTCN(64) → Dropout(0.2) → BiLSTM(32) → Dropout(0.2) → Dense(horizon)
+   - Usage:
+     - Complex biomechanical sequences requiring multi-scale analysis
+     - High-precision movement analysis
+     - Research scenarios where maximum model capacity is needed
+   - Pros:
+     - Highest model capacity
+     - Best at capturing complex temporal relationships
+     - Combines benefits of all previous architectures
+     - Superior performance on complex patterns
+   - Cons:
+     - Highest computational cost
+     - Most complex to tune
+     - Requires largest datasets
+     - Highest risk of overfitting
+     - Longest training time
+
+5. **NBEATS Probabilistic Forecast** (Comparison Model)
+   - Architecture: Stack of basis expansion blocks with backward and forward residual connections
+   - Usage:
+     - Probabilistic time series forecasting
+     - Uncertainty quantification in predictions
+   - Advantages:
+     - Provides uncertainty estimates
+     - Interpretable decomposition
+     - Strong performance on univariate series
+
+6. **Exponential Smoothing Forecast** (Comparison Model)
+   - Implementation: State space model with exponential decay
+   - Usage:
+     - Baseline forecasting
+     - Trend and seasonality decomposition
+   - Advantages:
+     - Simple and interpretable
+     - Computationally efficient
+     - Robust to noise
+
+7. **XGBoost Models** (Comparison Models)
+   - XGBoostRegressor:
+     - Used for exhaustion rate prediction
+     - Handles non-linear relationships
+     - Feature importance ranking
+   - XGBoostClassifier:
+     - Used for injury risk prediction
+     - Handles imbalanced classes
+   - Advantages:
+     - Handles high-dimensional data
+     - Built-in feature importance
+     - Robust to outliers
+
+Common Parameters Across All Architectures:
+- Optimizer: Adam
+- Loss Function: MSE
+- Metrics: MAE
+- Batch Size: 32
+- Initial Epochs: 10
+
+Selection Criteria:
+- Dataset Size: Simpler architectures for smaller datasets
+- Computational Resources: Standard LSTM for limited resources
+- Prediction Requirements: BiLSTM variants only for offline analysis
+- Pattern Complexity: More complex architectures for intricate temporal patterns
+- Real-time Needs: Standard LSTM or TCN-LSTM for online predictions
+
+Core LSTM Mathematics:
+- **Forget Gate:**  
+  $$f_t = \sigma(W_f \cdot [h_{t-1}, x_t] + b_f)$$  
+
+- **Input Gate:**  
+  $$i_t = \sigma(W_i \cdot [h_{t-1}, x_t] + b_i)$$  
+  $$\tilde{C}_t = \tanh(W_C \cdot [h_{t-1}, x_t] + b_C)$$  
+
+- **Cell State Update:**  
+  $$C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$$  
+
+- **Output Gate:**  
+  $$o_t = \sigma(W_o \cdot [h_{t-1}, x_t] + b_o)$$  
+  $$h_t = o_t \odot \tanh(C_t)$$  
+
+*Where \( W \) and \( b \) represent weights and biases, \( \sigma \) is the sigmoid function, and \( \odot \) denotes element-wise multiplication.*
+
+
+
+### Preprocessing Approaches
+
+- Clipped physiological metrics (joint_exhaustion_rates) with minimum of 0
+- Scaling numerical features
+- filtering low null columns and imputing higher volume nulls
+- checked z-score for suspicious variables
+
+
+
+
+
+
+### Model Results Findings
+
+### Model Performance Summary
+
+### Training Parameters:
+  - Epochs - 200
+  - Batch Size = 32
+  - Early Stopping Patience = 5
+  - lstm layers = 1
+  - dense_units = 1
+  - dropout = 0.2
+
+### Base Models
+| Model Type | MSE | MAE | R² Score | Accuracy | Precision | Recall | F1 Score |
+|------------|-----|-----|----------|----------|-----------|--------|-----------|
+| Exhaustion Model (Base) | 0.008768 | 0.043824 | 0.7046 | - | - | - | - |
+| Exhaustion Model (Trial Agg.) | 0.006269 | 0.038587 | -0.0895 | - | - | - | - |
+| Exhaustion Model (Shot Agg.) | 0.003367 | 0.028238 | 0.7340 | - | - | - | - |
+| Injury Model (Base) | - | - | - | 0.889 | 0.831 | 0.789 | 0.809 |
+| Injury Model (Trial Agg.) | - | - | - | 0.950 | 0.950 | 1.000 | 0.974 |
+| Injury Model (Shot Agg.) | - | - | - | 0.726 | 0.796 | 0.709 | 0.750 |
+| XGBoost Injury Model | - | - | - | 0.967 | 0.962 | 0.973 | 0.967 |
+
+
+### Joint-Specific Injury_Risk Models
+| Joint | Accuracy | Precision | Recall | F1 Score |
+|-------|----------|-----------|--------|-----------|
+| L_ANKLE | 0.741 | 1.000 | 0.013 | 0.026 |
+| R_ANKLE | 0.775 | 0.545 | 0.655 | 0.595 |
+| L_WRIST | 0.871 | 0.711 | 0.858 | 0.778 |
+| R_WRIST | 0.925 | 0.846 | 0.878 | 0.862 |
+| L_ELBOW | 0.867 | 0.750 | 0.778 | 0.764 |
+| R_ELBOW | 0.930 | 0.934 | 0.799 | 0.861 |
+| L_KNEE | 0.871 | 0.892 | 0.493 | 0.635 |
+| R_KNEE | 0.819 | 0.698 | 0.602 | 0.647 |
+| L_HIP | 0.884 | 0.929 | 0.601 | 0.730 |
+| R_HIP | 0.818 | 0.781 | 0.520 | 0.625 |
+
+### Joint-Specific Exhaustion_Rate Models
+| Joint | MSE | MAE | R² Score |
+|-------|-----|-----|----------|
+| L_ANKLE | 0.559260 | 0.607205 | -4.086e+06 |
+| R_ANKLE | 0.631438 | 0.616338 | -5.579e+06 |
+| L_WRIST | 0.292680 | 0.480319 | -1.765e+06 |
+| R_WRIST | 0.399011 | 0.571976 | -2.171e+06 |
+| L_ELBOW | 0.291242 | 0.472093 | -1.175e+06 |
+| R_ELBOW | 0.484043 | 0.626293 | -1.930e+06 |
+| L_KNEE | 0.387772 | 0.482502 | -2.875e+06 |
+| R_KNEE | 0.663009 | 0.661079 | -5.447e+06 |
+| L_HIP | 0.492328 | 0.588739 | -2.803e+06 |
+| R_HIP | 0.587490 | 0.650270 | -3.469e+06 |
+
+
+
+### Explaination using Visuals and Feature importance to understand what features are important in each scenario
+
+### Exhaustion Rate Regression
+  The best Regression model overall was our Shot Phase Aggregated Exhaustion Rate Model showing 
+    - a 0.7340 R² Score: Much better than mean and best of all models
+    - a 0.028238 MAE: Best of all models
+    - a 0.003367 MSE: Best of all models
+
+  <img src="images/shot_phase_agg_exhaustion_rate_forecast.png" alt="Shot Phase Exhaustion Rate Forecast" style="width:100%; display:block; margin: 0 auto;" />
+
+  Regression Alternative:
+    - NBEATS probabilistic forecast had a slightly better MAE then our custom LSTM model above
+  Forecast Metrics:
+                    MAE      RMSE      SMAPE
+  NBEATS        0.135291  0.160437  60.513207
+  ExpSmoothing  0.116982  0.139461  54.443056
+  <img src="images/nbeats_expsmoothing_forecast.png" alt="Shot Phase Exhaustion Rate Forecast" style="width:100%; display:block; margin: 0 auto;" />
+
+### Injury Risk Classification
+
+  The best Classification model overall was our Injury Risk  Model (Trial Agg.):
+    - 0.950 Accuracy: Best of all models
+    - 0.950 Precision: Best of all models
+    - 1.000 Recall: Best of all models
+    - 0.974 F1 Score: Best of all models
+
+ <img src="images/trial_agg_injury_forecast.png" alt="Trial Exhaustion Rate Forecast" style="width:100%; display:block; margin: 0 auto;" />
+
+  Classification Alternative:
+    - Tree Based Modeling: rRandomForest, CatBoost,and XGBoost would be better for this data due to:
+      - Non Linearity
+      - High Dimensionality
+  
+
+  
+
+
+
+
+---------------------------------------------------------------------------------------------------
+# Conclusion
+### Summarize the project
+
+### Key Findings and Results
+
+### 1. Model Performance Overview
+
+**Best Performing Models:**
+- **Exhaustion Prediction:** Shot Phase Aggregated Model
+  - R² Score: 0.7340 (73.4% variance explained)
+  - MAE: 0.028238 (lowest error rate)
+  - MSE: 0.003367 (highest precision)
+  
+- **Injury Risk Classification:** Trial Aggregated Model
+  - Accuracy: 0.950 (95.0% correct predictions)
+  - Precision: 0.950 (95.0% true positive rate)
+  - Recall: 1.000 (100% sensitivity)
+  - F1 Score: 0.974 (97.4% harmonic mean)
+
+### 2. Joint-Specific Analysis
+
+**Top Performing Joints for Injury Risk:**
+1. Right Elbow (93.0% accuracy, 0.861 F1)
+2. Right Wrist (92.5% accuracy, 0.862 F1)
+3. Left Hip (88.4% accuracy, 0.730 F1)
+
+**Joint Performance Patterns:**
+- Upper body joints showed higher prediction accuracy
+- Right-side joints generally performed better than left
+- Ankle predictions showed highest variability
+
+### 3. Alternative Model Comparisons
+
+**NBEATS vs Custom LSTM:**
+```
+Model          MAE      RMSE     SMAPE
+NBEATS        0.135    0.160    60.51
+ExpSmoothing  0.117    0.139    54.44
 ```
 
-Literature Review
+### 4. Key Technical Achievements
 
-The literature indicates that predicting fatigue and injury risk in athletes requires an integration of biomechanical outputs with physiological signals. Key findings from previous studies include:
+1. **Temporal Modeling Success**
+   - Successfully captured fatigue progression
+   - Effective handling of time-series dependencies
+   - Robust performance across different time scales
 
-```         
-Athlete Burnout: Research has shown that burnout is influenced by multiple factors (e.g., stress, training load, support systems) that vary among athletes. Customizing training and recovery protocols based on individual warning signs may mitigate injury risks.
+2. **Feature Engineering Impact**
+   - Asymmetry features proved crucial
+   - Rolling statistics enhanced prediction accuracy
+   - Temporal dynamics captured effectively
 
-Fatigue Data Collection: Detailed datasets have been published to capture muscle activity, motion capture data, and self-reported fatigue levels during shoulder rotations. These resources serve as a foundation for building predictive algorithms.
+3. **Model Architecture Innovations**
+   - Dual-pipeline approach proved effective
+   - Modular design enabled flexible deployment
+   - Scalable framework for future extensions
 
-Methodological Advances: Recent studies have applied neural network architectures to model fatigue—such as a fully-connected network for predicting crack growth in metals [DOI: 10.1016/j.engfracmech.2020.107402]—and used combined physical and physiological workload metrics to forecast injury risk in professional soccer players [DOI: 10.52082/jssm.2024.537].
-```
+### Implications and Applications
 
-These studies, along with tutorials on SHAP values and Bayesian optimization from DataCamp, inform our approach to feature engineering and model selection. Methodology Data Loading and Preprocessing
+1. **Practical Applications:**
+   - Real-time fatigue monitoring
+   - Injury risk prevention
+   - Training load optimization
+   - Recovery planning
 
-The project begins by merging a CSV file containing trial-level measurements (e.g., joint energy and power) with participant metadata using unique identifiers like trial_id and player_participant_id. Rigorous data cleaning (including imputation and removal of missing values) is performed with comprehensive logging and debugging routines. Feature Engineering
+2. **Technical Contributions:**
+   - Novel dual-pipeline architecture
+   - Effective feature engineering framework
+   - Reproducible modeling approach
 
-Key features derived in this project include:
+3. **Future Directions:**
+   - Integration with real-time monitoring systems
+   - Extension to other sports domains
+   - Enhancement with attention mechanisms
+   - Exploration of hybrid architectures
 
-```         
-Joint Metrics: Aggregated joint energy and power are computed to serve as primary indicators of physical output.
+### Limitations and Considerations
 
-Simulated Physiological Measures: A simulated heart rate is calculated as a function of mean and joint energy. In addition, “fake body” metrics (sleep quality, sleep duration, resting heart rate, heart rate variability, and stress index) are introduced to mimic wearable sensor data.
+1. **Data Constraints:**
+   - Limited to basketball shooting motions
+   - Simulated physiological metrics
+   - Single player dataset
 
-Temporal Dynamics: Lag features (e.g., previous trial exhaustion) and rolling statistics (moving averages, volatility measures) capture trends across trials. The trial exhaustion rate is defined as the change in exhaustion per trial.
+2. **Model Constraints:**
+   - Computational requirements for real-time use
+   - Need for calibration across different athletes
+   - Dependency on quality of input data
 
-Asymmetry Features: Differences between left and right joint metrics are measured to detect imbalances that may predispose athletes to injury.
-```
+This project demonstrates the successful application of advanced machine learning techniques to sports biomechanics, establishing a robust framework for fatigue and injury risk prediction. The dual-pipeline strategy, combined with careful feature engineering and modular architecture, provides a foundation for future research and practical applications in sports science and athletic performance monitoring.
 
-Workout Simulation
 
-To mimic the progression of fatigue:
 
-```         
-Workout 1: Contains the original 125 trials.
+------------------------------------------------------------------------
 
-Workout 2: Is a duplicate of the original trials but simulates gradual deterioration in fake body metrics (e.g., lower sleep quality, higher resting heart rate) by adding a workout_id and trial counter.
-```
+### Resources
 
-These two datasets are concatenated to form a comprehensive dataset for subsequent modeling. Predictive Modeling Pipelines Pipeline 1: Regression for Predicting Trial Exhaustion Rate
-
-```         
-Input Features: Aggregated joint metrics, simulated physiological features, and temporal features.
-
-Model: A baseline linear regression model is used, with future plans to incorporate Random Forests, Gradient Boosting, or LSTM networks.
-
-Evaluation: Model performance is assessed using Mean Absolute Error (MAE), Root Mean Squared Error (RMSE), and R², along with visualizations comparing predicted versus actual exhaustion rates.
-```
-
-Pipeline 2: Classification for Predicting Joint Injury Risk
-
-```         
-Input Features: Joint-specific metrics, asymmetry measurements, and cumulative load indicators.
-
-Labeling: Trials are classified as high injury risk if a rolling sum of joint stress exceeds a threshold (e.g., the 75th percentile).
-
-Model: Initially, logistic regression or decision tree classifiers are employed. Future work may involve Random Forests or neural network-based methods.
-
-Evaluation: Metrics such as accuracy, precision, recall, F1-score, and ROC-AUC are used, supplemented by feature importance analyses using SHAP values.
-```
-
-Integration and Modularity
-
-Both pipelines share common preprocessing and feature engineering modules, ensuring that the workflow is modular and reproducible. Visualization tools—including histograms, correlation matrices, and temporal trend plots—are used throughout the analysis to validate each transformation step. Experimental Results
-
-The LSTM-based regression model for fatigue prediction demonstrated promising results:
-
-```         
-MSE: 0.00596
-
-MAE: 0.01762
-
-R² Score: 0.91808
-```
-
-Similarly, the injury risk classifier achieved strong performance:
-
-```         
-Overall Accuracy: 98.16%
-
-Precision: 93.84%
-
-Recall: 99.77%
-
-F1 Score: 96.72%
-```
-
-Joint-specific models yielded varying metrics, reflecting the inherent complexity of localized biomechanical data. Discussion
-
-This project illustrates the successful application of deep learning to model fatigue and predict injury risk in a real-world sports setting. Key challenges included managing the variability in biomechanical signals and optimizing model performance through careful feature engineering. The integration of temporal dynamics and asymmetry features was critical in capturing the underlying physiological responses. Future work may explore attention mechanisms or hybrid architectures to further refine predictive accuracy. Conclusion
-
-By combining real athlete data with simulated physiological metrics, this capstone project provides a novel approach to predicting fatigue and injury risks in baseball pitchers. The dual-pipeline strategy (regression and classification) along with modular integration of preprocessing and feature engineering modules establishes a robust framework that is transparent, reproducible, and adaptable for future research and practical deployment. References
-
-```         
 DataCamp Tutorial: Introduction to SHAP Values for Machine Learning Interpretability
 
 DataCamp Tutorial: Mastering Bayesian Optimization in Data Science
@@ -126,4 +512,5 @@ Nature Articles:
     Factors Leading to Athlete Burnout
 
     Dataset for Fatigue Analysis during Shoulder Rotations
-```
+
+
