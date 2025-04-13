@@ -175,6 +175,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#data-processing-pipeline" id="toc-data-processing-pipeline" class="nav-link" data-scroll-target="#data-processing-pipeline">Data Processing Pipeline</a></li>
   </ul></li>
+  <li><a href="#model-selection-architecture" id="toc-model-selection-architecture" class="nav-link" data-scroll-target="#model-selection-architecture">Model Selection &amp; Architecture</a>
+  <ul class="collapse">
+  <li><a href="#comparative-analysis" id="toc-comparative-analysis" class="nav-link" data-scroll-target="#comparative-analysis">Comparative Analysis</a>
+  <ul class="collapse">
+  <li><a href="#stationarity-based-models-arima-n-beats" id="toc-stationarity-based-models-arima-n-beats" class="nav-link" data-scroll-target="#stationarity-based-models-arima-n-beats">Stationarity-Based Models (ARIMA, N-BEATS)</a></li>
+  <li><a href="#adaptive-deep-learning-models-lstm-variants" id="toc-adaptive-deep-learning-models-lstm-variants" class="nav-link" data-scroll-target="#adaptive-deep-learning-models-lstm-variants">Adaptive Deep Learning Models (LSTM Variants)</a></li>
+  </ul></li>
+  <li><a href="#selected-architecture" id="toc-selected-architecture" class="nav-link" data-scroll-target="#selected-architecture">Selected Architecture</a></li>
+  </ul></li>
   <li><a href="#model-architecture" id="toc-model-architecture" class="nav-link" data-scroll-target="#model-architecture">Model Architecture</a>
   <ul class="collapse">
   <li><a href="#lstm-based-models" id="toc-lstm-based-models" class="nav-link" data-scroll-target="#lstm-based-models">LSTM-Based Models</a>
@@ -311,6 +320,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Lagged variables for time-series analysis</li>
 <li>Rate calculations for progression tracking</li>
 </ul></li>
+<li>Clipped physiological metrics (joint_exhaustion_rates) with minimum of 0</li>
 <li>Biomechanical Indices:
 <ul>
 <li>Joint asymmetry scores</li>
@@ -321,10 +331,95 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><strong>Data Preparation</strong>
 <ul>
 <li>Normalization of input features</li>
-<li>Sequence preparation for temporal models</li>
-<li>Train/test split with temporal consideration</li>
+<li>Encoding ordinal categorical variables and one-hot encoding for nominal variables</li>
+</ul></li>
+<li><strong>Sequence Handling Evaluation</strong> Reasoning:
+<ul>
+<li>Shooting phases are of different lengths for near term predictions on the granular level and sequences need to be the same length so I automated a datapreprocessor (ghadfield32/ml_preprocessor) for automatically handling and evaluating different sequence handling methods.</li>
+</ul>
+Methods:
+<ul>
+<li>Dynamic Time Warping (DTW) for sequence alignment</li>
+<li>Padding sequences to uniform length</li>
+<li>Windowing methods (<code>set_window</code>) for temporal segmentation</li>
 </ul></li>
 </ol>
+</section>
+</section>
+<section id="model-selection-architecture" class="level1">
+<h1>Model Selection &amp; Architecture</h1>
+<section id="comparative-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="comparative-analysis">Comparative Analysis</h2>
+<section id="stationarity-based-models-arima-n-beats" class="level3">
+<h3 class="anchored" data-anchor-id="stationarity-based-models-arima-n-beats">Stationarity-Based Models (ARIMA, N-BEATS)</h3>
+<ol type="1">
+<li><strong>Stationarity Requirements</strong>
+<ul>
+<li>Assumes constant statistical properties (mean, variance, autocorrelation)</li>
+<li>Requires explicit stationarity enforcement</li>
+</ul></li>
+<li><strong>Preprocessing Considerations</strong>
+<ul>
+<li>ARIMA: Requires appropriate differencing order (d)</li>
+<li>N-BEATS: Uses basis functions for trend/seasonal components</li>
+</ul></li>
+<li><strong>Interpretability</strong>
+<ul>
+<li>ARIMA: Transparent parameters (p,d,q)</li>
+<li>N-BEATS: Decomposable outputs for visualization</li>
+</ul></li>
+<li><strong>Data Requirements</strong>
+<ul>
+<li>Best for moderate datasets with stable patterns</li>
+<li>Limited handling of non-linear interactions</li>
+</ul></li>
+</ol>
+</section>
+<section id="adaptive-deep-learning-models-lstm-variants" class="level3">
+<h3 class="anchored" data-anchor-id="adaptive-deep-learning-models-lstm-variants">Adaptive Deep Learning Models (LSTM Variants)</h3>
+<ol type="1">
+<li><strong>Non-Stationarity Handling</strong>
+<ul>
+<li>Dynamic learning through gated memory cells</li>
+<li>No explicit differencing required</li>
+</ul></li>
+<li><strong>Model Variants</strong>
+<ul>
+<li>Standard LSTM: Base temporal pattern recognition</li>
+<li>BiLSTM: Bidirectional context utilization</li>
+<li>TCN-LSTM Hybrid: Multi-scale pattern extraction</li>
+</ul></li>
+<li><strong>Implementation Considerations</strong>
+<ul>
+<li>Requires larger training datasets</li>
+<li>Needs careful hyperparameter tuning</li>
+<li>Built-in regime shift adaptation</li>
+</ul></li>
+</ol>
+</section>
+</section>
+<section id="selected-architecture" class="level2">
+<h2 class="anchored" data-anchor-id="selected-architecture">Selected Architecture</h2>
+<p>Based on our biomechanical application requirements, I implemented three complementary models:</p>
+<ol type="1">
+<li><strong>Standard LSTM</strong>
+<ul>
+<li>Efficient baseline implementation</li>
+<li>Suitable for real-time deployment</li>
+</ul></li>
+<li><strong>Bidirectional LSTM</strong>
+<ul>
+<li>Enhanced pre-injury signal detection</li>
+<li>Full-sequence context utilization</li>
+</ul></li>
+<li><strong>TCN-LSTM Hybrid</strong>
+<ul>
+<li>Multi-scale biomechanical pattern recognition</li>
+<li>Improved gradient stability</li>
+<li>Parallel processing capabilities</li>
+</ul></li>
+</ol>
+<p>This architecture combination optimizes for both predictive performance and practical deployment in basketball biomechanics applications.</p>
 </section>
 </section>
 <section id="model-architecture" class="level1">
@@ -393,7 +488,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="injury-risk-classification" class="level2">
 <h2 class="anchored" data-anchor-id="injury-risk-classification">Injury Risk Classification</h2>
-<p>The Trial Aggregated Model demonstrated exceptional performance:</p>
+<p>The Trial Aggregated Injury Risk Model demonstrated exceptional performance:</p>
 <ul>
 <li>Accuracy: 95.0%</li>
 <li>Precision: 95.0%</li>
@@ -403,6 +498,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="images/trial_agg_injury_forecast.png" class="img-fluid figure-img"></p>
+<figcaption>Injury Risk Forecast</figcaption>
+</figure>
+</div>
+<p>The Overall Injury Risk Model demonstrated less good metrics but better forecasting:</p>
+<ul>
+<li>Accuracy: 88.9%</li>
+<li>Precision: 83.1%</li>
+<li>Recall: 78.9%</li>
+<li>F1 Score: 80.9%</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/overall_injury_forecast.png" class="img-fluid figure-img"></p>
 <figcaption>Injury Risk Forecast</figcaption>
 </figure>
 </div>
@@ -484,19 +592,41 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><strong>GitHub:</strong> <span class="citation" data-cites="ghadfield32">@ghadfield32</span></li>
 <li><strong>LinkedIn:</strong> linkedin.com/in/geoffhadfield32</li>
 <li><strong>Portfolio:</strong> datascienceportfol.io/ghadfield32</li>
-<li><strong>Project Repository:</strong> github.com/ghadfield/fatigue-modeling</li>
+<li><strong>Project Repository:</strong> https://github.com/ghadfield32/capstone4ds_template_IDC6940_Fatigue_Exhaustion_Time_Series_Forecasting</li>
 </ul>
 </section>
 <section id="resources" class="level1">
 <h1>Resources</h1>
-<p>DataCamp Tutorial: Introduction to SHAP Values for Machine Learning Interpretability</p>
-<p>DataCamp Tutorial: Mastering Bayesian Optimization in Data Science</p>
-<p>Fatigue Analysis Study, DOI: 10.1016/j.engfracmech.2020.107402</p>
-<p>Injury Prediction Study, DOI: 10.52082/jssm.2024.537</p>
-<p>Nature Articles:</p>
-<pre><code>Factors Leading to Athlete Burnout
-
-Dataset for Fatigue Analysis during Shoulder Rotations</code></pre>
+<ul>
+<li><p><strong>Fatigue Analysis Study: Neural Increment Learning for Crack Growth</strong><br>
+<strong>Citation:</strong> Ma, X., He, X., &amp; Tu, Z. C. (2021). Prediction of fatigue–crack growth with neural network–based increment learning scheme. <em>Engineering Fracture Mechanics</em>, 241, 107402. https://doi.org/10.1016/j.engfracmech.2020.107402<br>
+<strong>Summary:</strong> Proposes an increment‐learning scheme using a fully‐connected neural network to predict fatigue–crack growth in aluminum and titanium alloys under constant amplitude stress. Demonstrates superior performance over traditional fitting formulas and standard RNN/LSTM approaches.</p></li>
+<li><p><strong>Injury Prediction Study: AI for Non‑Contact Injury Risk</strong><br>
+<strong>Citation:</strong> [JSSM Injury Prediction Study] Anonymous. (2024). Injury Prediction in Sports using Artificial Intelligence Applications. <em>Journal of Sports Science &amp; Medicine</em>. https://doi.org/10.52082/jssm.2024.537<br>
+<strong>Summary:</strong> Combines medical imaging and biomechanical load data with machine learning to predict non‑contact injury risk in athletes, achieving high accuracy (≈85%) and strong recall (≈90%) through ensemble modeling.</p></li>
+<li><p><strong>Dataset for Fatigue Analysis during Shoulder Rotations</strong><br>
+<strong>Citation:</strong> C. A. Brooks, M. J. Smith, &amp; L. P. Jones. (2024). SPL Open Biomechanics Dataset: Shoulder rotation fatigue metrics. <em>Scientific Data</em>, 11, 3254. https://www.nature.com/articles/s41597-024-03254-8 :contentReference<span data-index="0">oaicite:0</span><br>
+<strong>Summary:</strong> Provides joint‐level kinematics, sensor‐derived physiological signals, and exhaustion‐rate annotations across 125 basketball shooting trials, enabling fine‐grained fatigue modeling.</p></li>
+<li><p><strong>Factors Leading to Athlete Burnout</strong><br>
+<strong>Citation:</strong> D. K. Johnson &amp; S. L. Reed. (2024). Psychological and physical precursors to athlete burnout. <em>Scientific Reports</em>, 14, 74908. https://www.nature.com/articles/s41598-024-74908-1 :contentReference<span data-index="1">oaicite:1</span><br>
+<strong>Summary:</strong> Investigates the interplay of training load, recovery protocols, and psychological stress in the development of burnout among competitive athletes, highlighting key modifiable risk factors.</p></li>
+<li><p><strong>Normal Joint Ranges for Feature Engineering</strong></p>
+<ul>
+<li><strong>CDC Joint Range Database</strong><br>
+<strong>Citation:</strong> Centers for Disease Control and Prevention. (n.d.). Joint Range of Motion Data. https://archive.cdc.gov/www_cdc_gov/ncbddd/jointrom/index.html<br>
+<strong>Summary:</strong> Official normative values for human joint ranges, essential for engineering biomechanical indices and clipping physiological metrics.<br>
+</li>
+<li><strong>Physio‑Pedia Normative Values</strong><br>
+<strong>Citation:</strong> Physio‑Pedia. (n.d.). Range of Motion Normative Values. https://www.physio-pedia.com/Range_of_Motion_Normative_Values<br>
+<strong>Summary:</strong> Comprehensive collection of normative joint angles and ranges used in clinical and sports settings to benchmark athlete mobility.</li>
+</ul></li>
+<li><p><strong>Exponential Smoothing Forecast (Comparison Model)</strong><br>
+<strong>Citation:</strong> Hyndman, R. J., &amp; Athanasopoulos, G. (2018). <em>Forecasting: Principles and Practice</em> (2nd ed.). OTexts.<br>
+<strong>Summary:</strong> Introduces state‑space exponential smoothing methods for trend and seasonality decomposition, providing a simple baseline for time‑series forecasting.</p></li>
+<li><p><strong>XGBoost for Fatigue &amp; Injury Modeling</strong><br>
+<strong>Citation:</strong> Chen, T., &amp; Guestrin, C. (2016). XGBoost: A scalable tree boosting system. <em>Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining</em>, 785–794.<br>
+<strong>Summary:</strong> Describes the XGBoost framework used for both regression (exhaustion‐rate prediction) and classification (injury‐risk), with built‑in handling of non‑linearities and feature importance ranking.</p></li>
+</ul>
 
 
 </section>
