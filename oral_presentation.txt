@@ -1,175 +1,293 @@
-**[Pre‑Talk Setup – 30 sec]**  
-> **(On your laptop, open your terminal and preview the Reveal.js deck before you start.)**  
-> ```bash
-> cd ~/path/to/your/repo/capstone4ds_template_IDC6940_Fatigue_Exhaustion_Time_Series_Forecasting
-> quarto preview slides.qmd
+
+
+## Slide 1: Title  
+> **“Modeling Fatigue and Injury Risk in Athletic Movements: A Deep Learning Approach to Basketball Biomechanics”**  
+> “Good afternoon. I’m Geoffrey Hadfield. Today I’ll walk you through how we applied LSTM‑based deep learning to forecast fatigue and flag injury risk during basketball shooting trials.”
+
+---
+
+## Slide 2: Introduction → Project Overview  
+“Basketball requires split‑second moves and explosive jumps. As fatigue builds, joint stability declines and non‑contact injuries become far more likely. If we can predict an athlete’s fatigue trajectory and identify the moments when joints are high‑risk, coaches can intervene—adjusting drills or prescribing rest—before injury strikes. Our capstone project set out to create exactly that forecasting system.”
+
+---
+
+## Slide 3: Deep Learning Approach  
+“Classical time‑series tools falter when signals combine smooth endurance drains with sudden exhaustion bursts. LSTM networks, however, learn to remember—or ignore—features over time, making them ideal for our multidimensional biomechanical and physiological streams.”
+
+---
+
+## Slide 4: Project Goals  
+“We built two interconnected models:  
+1. **Regression** of a continuous `exhaustion_rate`—how quickly fatigue accumulates frame by frame.  
+2. **Classification** of `injury_risk`—a binary flag when fatigue crosses a high‑risk threshold.  
+By combining them, we provide actionable insights: real‑time fatigue scores and early warning flags for injury prevention.”
+
+---
+
+## Slide 5: Sequence Analysis  
+“Shooting sequences vary in length, so we tested three alignment methods:  
+- **Hierarchical Dynamic Time Warping**  
+- **Distributed Padding**  
+- **Basic Sliding Window (`set_window`)**  
+Surprisingly, the fixed sliding window delivered the best short‑term forecasts—allowing us to predict two windows ahead with consistent accuracy.”
+
+---
+
+## Slide 6: Key Literature  
+“Two studies guided our design:  
+1. A 2020 *Engineering Fracture Mechanics* paper using neural nets to model fatigue crack growth analogies in muscle (DOI 10.1016/j.engfracmech.2020.107402).  
+2. A 2024 *Journal of Sports Science & Medicine* article forecasting injury risk by combining fatigue and biomechanical metrics (DOI 10.52082/jssm.2024.537).”
+
+---
+
+## Slide 7: Data Source  
+“We leveraged the **SPL Open Biomechanics** dataset: 125 basketball shooting trials, each frame tagged with joint kinematics, simulated heart rate, sleep metrics, HRV, and more—yielding a rich, time‑synchronized X/Y data stream.”
+
+---
+
+## Slide 8: X‑Features — Joint Metrics  
+“Per frame we record mechanically meaningful metrics:  
+- **Joint Energy** (50–250 J)  
+- **Joint Power** (100–1000 W)  
+These describe how much work each joint does during the lift, release, and follow‑through.”
+
+---
+
+## Slide 9: X‑Features — Physiological Metrics  
+“To capture systemic fatigue, we include simulated physiology:  
+- **Heart Rate** (60–180 bpm)  
+- **Sleep Quality & Duration**  
+- **Resting HR & HRV**  
+- **Stress Index**  
+Together these enrich our model with whole‑body context.”
+
+---
+
+## Slide 10: X‑Features — Temporal & Asymmetry  
+“We engineered higher‑order and asymmetry features:  
+- **Exhaustion Rate per Trial** (our regression target)  
+- **Rolling Averages & Lagged Exhaustion**  
+- **Left/Right Joint Asymmetries**  
+- **Player Height & Weight**  
+In total, over 80 candidate inputs.”
+
+---
+
+## Slide 11: Y‑Variables — Regression  
+> “**Exhaustion Rate** measures per‑trial fatigue accumulation rate:  
+> \[
+> \text{exhaustion_rate} = \frac{\Delta(\text{by_trial_exhaustion_score})}{\Delta(\text{by_trial_time})}
+> \]  
+> This gives us a dynamic, frame‑wise fatigue measure—far richer than a single end‑of‑trial score.”
+
+---
+
+## Slide 12: Y‑Variables — Classification  
+> “**Injury Risk** flags high‑risk windows whenever rolling exhaustion exceeds the athlete’s own expanding 75th percentile:  
+> ```python
+> data['injury_risk'] = (data['rolling_exhaustion'] >
+>     safe_expanding_quantile(data['rolling_exhaustion'])).astype(int)
 > ```  
-> This launches your presentation at `http://localhost:4200`. Keep that browser window ready.
+> This self‑referential threshold adapts to each player’s evolving capacity.”
 
 ---
 
-### Slide 1 | Title (0:00–0:30)  
-**“Modeling Fatigue and Injury Risk in Athletic Movements”**  
-_A Deep Learning Approach to Basketball Biomechanics_  
-_Geoffrey Hadfield • March 24, 2025_  
-
-> **Speaker:**  
-> Hi everyone, I’m Geoff Hadfield. Today I’m going to show you how I used LSTM‑based deep‑learning models to forecast fatigue and injury risk in basketball shooting trials—and how you can run these slides yourself from my GitHub repo.
-
----
-
-### Slide 2 | Introduction (0:30–1:30)  
-- Why fatigue & injury modeling?  
-- LSTM networks for sequential biomechanics  
-- Real‑time monitoring potential  
-
-> **Speaker:**  
-> We all know that in high‑intensity sports like basketball, accumulated fatigue dramatically drives up injury risk. My project tackles two challenges:  
-> 1. Predicting how quickly a player’s exhaustion ramps up during shooting drills.  
-> 2. Flagging when joint stress crosses dangerous thresholds.  
-> LSTMs are perfect for this because they learn temporal patterns in biomechanics and physiological data—no need for manual feature crafting of every possible fatigue spike.  
+## Slide 13: Energy Calculations  
+> “We compute a normalized exhaustion score by cumulatively summing each trial’s total joint energy and dividing by the trial maximum:  
+> ```python
+> df['by_trial_energy'] = df.groupby('trial_id')['total_energy'].cumsum()
+> df['by_trial_exhaustion_score'] = (
+>     df.groupby('trial_id')['by_trial_energy']
+>       .transform(lambda x: x / x.max())
+> )
+> ```  
+> That score runs from 0 to 1.”
 
 ---
 
-### Slide 3 | Problem Statement & Literature (1:30–2:30)  
-- Complex, non‑linear fatigue/injury links  
-- Personalized monitoring need  
-- Key studies:  
-> • Ma et al. (2021) on fatigue‑crack growth ⎯ neural increment learning  
-> • Anonymous (2024) on AI for non‑contact injury risk  
-
-> **Speaker:**  
-> Prior work confirms two things:  
-> • Personalized factors—training load, stress, recovery—dramatically influence injury risk.  
-> • Neural networks can outperform classical fitting formulas for fatigue progression.  
-> We combine those insights to build a real‑time pipeline for basketball athletes.
+## Slides 14–15: Descriptive Statistics  
+“We examined means, standard deviations, minima, and maxima for every feature.  For example, joint_power averaged ~20 W, with occasional spikes above 60 W.  These summaries confirmed no wild outliers lurked.”
 
 ---
 
-### Slide 4 | Data & Methodology (2:30–3:45)  
-**SPL Open Biomechanics Dataset:**  
-- 125 basketball shooting trials  
-- Joint metrics: energy, power  
-- Physiological: heart_rate, wearables  
-- Temporal: exhaustion_rate, rolling averages  
-- Asymmetry: left/right joint differences  
-
-**Preprocessing Flow:**  
-1. Clean & smooth sensor signals  
-2. Feature engineering: rolling windows, lagged rates  
-3. Normalize & encode height/weight  
-4. Sequence alignment: DTW, padding, set_window  
-
-> **Speaker:**  
-> I ingested joint‑level kinematics, simulated heart‑rate and biosensor data. After outlier removal and smoothing, I engineered rolling exhaustion rates and asymmetry indices. Handling variable‑length shooting sequences was critical—so I built `ml_preprocessor` to automatically test DTW alignment, zero‑padding, and sliding windows.
+## Slide 16: Multicollinearity Assessment  
+“A near‑perfect 0.91 correlation emerged between joint_energy and joint_power.  Since joint_energy scored higher in feature‑importance analyses, we dropped joint_power to avoid redundancy.  We applied the same logic to highly correlated HR metrics.”
 
 ---
 
-### Slide 5 | Model Selection & Architecture (3:45–4:45)  
-| Model Family    | Pros                           | Cons                          |
-|-----------------|--------------------------------|-------------------------------|
-| **ARIMA/N‑BEATS** | Transparent, light data needs  | Stationarity assumptions      |
-| **LSTM Variants** | Learns non‑stationarity, flexible | Heavier compute, tuning needed |
-
-**Chosen Suite:**  
-1. Standard LSTM  
-2. Bidirectional LSTM  
-3. TCN‑LSTM Hybrid  
-
-> **Speaker:**  
-> I first ran ARIMA and N‑BEATS as baselines, but they struggled with regime shifts—fatigue accelerates non‑linearly. LSTM families handle these shifts out of the box, so I focused on three flavors: a fast baseline LSTM, a BiLSTM for richer context, and a TCN‑LSTM to capture multi‑scale patterns.
+## Slide 17: Correlation Matrix  
+*(Display heatmap)*  
+“This heatmap reveals a few strong pairwise correlations—pruning these variables simplified our inputs without sacrificing signal.”
 
 ---
 
-### Slide 6 | Model Architectures (4:45–5:45)  
-**Standard LSTM:**  
-```python
-model = Sequential([
-  LSTM(64, return_sequences=True),
-  Dropout(0.2),
-  LSTM(32),
-  Dense(horizon)
-])
-```
-
-**BiLSTM:**  
-```python
-model = Sequential([
-  Bidirectional(LSTM(64, return_sequences=True)),
-  Dropout(0.2),
-  Bidirectional(LSTM(32)),
-  Dense(horizon)
-])
-```
-
-**TCN‑LSTM Hybrid:**  
-```python
-model = Sequential([
-  TCN(64),
-  Dropout(0.2),
-  LSTM(32),
-  Dense(horizon)
-])
-```
-
-> **Speaker:**  
-> The standard LSTM is our workhorse—quick to train and deploy. BiLSTM wraps each LSTM bidirectionally for pre‑injury signal detection. The TCN‑LSTM introduces convolutional layers to extract short‑ and long‑term features in parallel, stabilizing gradients with dilated convolutions.
+## Slides 18–21: Feature Importance (SHAP & Permutation)  
+“After fitting preliminary LSTM and tree‑based models, we computed both SHAP and permutation importances.  
+- For **injury_risk**, rolling_exhaustion_std, hip_asymmetry, and simulated_HR topped the charts.  
+- For **exhaustion_rate**, lagged exhaustion, joint_energy, and rolling_hr_mean were most predictive.  
+From these, we distilled three 10‑feature sets: one for overall fatigue, one for overall injury, and a specialized set per joint.”
 
 ---
 
-### Slide 7 | Results & Analysis (5:45–7:00)  
-**Fatigue Forecast (Shot‑phase):**  
-- R² = 0.734  MAE = 0.028  MSE = 0.0034  
-
-**Injury Risk (Trial‑agg):**  
-- Accuracy 95%  Precision 95%  Recall 100%  F1 97.4%  
-
-**Joint Winners:**  
-- Right Elbow: 93% accuracy  
-- Right Wrist: 92.5%  
-- Left Hip: 88.4%  
-
-> **Speaker:**  
-> Our shot‑phase exhaustion model explains 73% of variance—fantastic for a single LSTM. The injury classifier nails every positive case in trial‑aggregated tests, with F1 nearly 98%. Joints like the right elbow stand out, highlighting where monitoring matters most.
+## Slide 22: Data Visualizations  
+“We plotted histograms and scatterplots of joint metrics against exhaustion_rate, ensuring our feature scales and relationships appeared sensible before model fitting.”
 
 ---
 
-### Slide 8 | Implementation & Future Work (7:00–8:00)  
-- **Real‑time dashboard:** live sensor feeds → fatigue & risk alerts  
-- **Training Optimization:** personalized load & recovery plans  
-- **Next steps:**  
-  - Speed up inference with model quantization  
-  - Extend to other sports (tennis, baseball)  
-  - Explore transformer‑based hybrids  
-
-> **Speaker:**  
-> The models are wrapped in a Streamlit dashboard that streams live biosensor data and pops alerts when exhaustion or injury risk crosses thresholds. Next, I’m optimizing inference speed, adding new sports domains, and investigating transformer‑LSTM hybrids.
+## Slide 23: Final Feature Selection  
+“Armed with importance rankings, we finalized three lean feature sets—each containing the top ten predictors.  This ensured every model trained on its strongest signals.”
 
 ---
 
-### Slide 9 | Conclusion (8:00–9:00)  
-- **Key achievements:**  
-  • Captured fatigue progression with 73% R²  
-  • Detected injury risk with 95%+ accuracy  
-  • Built a modular, real‑time pipeline  
-- **Practical impact:**  
-  • On‑court athlete monitoring  
-  • Data‑driven training adjustments  
-  • Injury prevention at scale  
-
-> **Speaker:**  
-> To wrap up: we’ve shown that deep‑learning architectures can reliably predict fatigue and flag injury risk in basketball biomechanics. This modular framework can plug into live systems, helping coaches make smarter, data‑driven decisions.
+## Slide 24: **Model Selection Criteria**  
+“We weighed two philosophies:  
+1. **Stationarity‑Based** (ARIMA, N‑BEATS) – Highly interpretable but brittle under sudden regime shifts.  
+2. **Adaptive Deep Learning** (LSTM variants) – Dynamically learns non‑linear patterns and abrupt fatigue spikes, requiring more data and compute.  
+Because basketball fatigue blends slow drains and fast exhaustion—and we need both real‑time and offline insights—we focused on **LSTM‑family models**.”
 
 ---
 
-### Slide 10 | Resources & Contact (9:00–10:00)  
-- **GitHub repo:** `ghadfield32/capstone4ds_template_IDC6940…`  
-- **Email:** ghadfield32@gmail.com  
-- **LinkedIn:** linkedin.com/in/geoffhadfield32  
-- **Key papers & datasets** (clickable in deck)  
+## Slide 25: **LSTM Variants in Plain English**  
 
-> **Speaker:**  
-> Thank you for your time. All code, data pipelines, and slide files live in my GitHub repo. Open an issue if you get stuck previewing the deck with `quarto preview`.  I’m happy to take questions now or chat afterward—feel free to reach out anytime!
+**Standard LSTM**  
+- A two‑layer network that filters incoming frames, learning which past signals to remember or forget.  
+- **Ideal for real‑time fatigue forecasting** on live drills.  
+- **Trade‑off:** Lightweight and fast, but blind to future context.
 
+**Bidirectional LSTM (BiLSTM)**  
+- Runs two LSTMs—forward and backward—then merges them.  
+- **Great for injury classification** on complete trials, spotting subtle pre‑ and post‑movement patterns.  
+- **Trade‑off:** Twice the compute, not suited for live monitoring.
 
+**TCN‑LSTM Hybrid**  
+- A Temporal Convolutional Network first extracts features at multiple time scales, then an LSTM weaves those features into a temporal story.  
+- **Best for** capturing both fast shocks (shot release) and slow trends (cumulative fatigue).  
+- **Trade‑off:** More hyperparameters, longer training, needs more data.
 
+**TCN‑BiLSTM (Exploratory)**  
+- Combines multi‑scale convolution with bidirectional memory for maximum pattern capacity.  
+- **Trade‑off:** Highest compute cost and overfitting risk.
+
+**Baselines**  
+- **N‑BEATS** for probabilistic forecasts,  
+- **Exponential Smoothing** for a simple benchmark,  
+- **XGBoost** to compare against tree‑based models.
+
+---
+
+## Slide 26: **Core LSTM Math—Explained**  
+“Every LSTM cell uses three gates to manage memory:  
+1. **Forget Gate** – decides which old details to discard.  
+2. **Input Gate** – selects which new details to store.  
+3. **Output Gate** – determines what to reveal from memory.  
+This learnable gating lets the network tune itself to real‑time fatigue drifts and sudden exhaustion bursts.”
+
+---
+
+## Slide 27: Preprocessing & Training  
+“We clipped negative values, standardized with z‑scores, filtered near‑zero variance columns, and imputed missing frames.  Models trained up to 200 epochs with Adam optimizer, batch size 32, and early stopping (patience = 5).”
+
+---
+
+## Slides 28–29: **Base Model Performance**  
+
+**Exhaustion Forecast (Shot‑Phase LSTM):**  
+- **MSE:** 0.0034  
+- **MAE:** 0.0282  
+- **R²:** 0.7340  
+
+**Injury Classification (Trial‑Aggregated BiLSTM):**  
+- **Accuracy:** 0.950  
+- **Precision:** 0.950  
+- **Recall:** 1.000  
+- **F1 Score:** 0.974  
+
+**XGBoost (Injury):** Accuracy 0.967
+
+---
+
+## Slides 30–31: **Joint‑Specific Models**  
+“We trained separate LSTM or XGBoost models per joint.  The **right elbow** achieved 93% accuracy for injury risk; the **left wrist** topped 0.29 MSE for exhaustion rate.  These joint‑level predictions inform targeted load management.”
+
+---
+
+## Slide 32: Regression Forecast Plot  
+*(Show shot_phase_agg_exhaustion_rate_forecast.png)*  
+“Our LSTM tracks both gradual fatigue drifts and sudden jumps, giving actionable minute‑by‑minute exhaustion forecasts.”
+
+---
+
+## Slide 33: Alternative Forecasting  
+*(Show nbeats_expsmoothing_forecast.png)*  
+“By comparison, N‑BEATS and exponential smoothing delivered MAEs of 0.135 and 0.117—far worse than our 0.028.”
+
+---
+
+## Slide 34: Injury‑Risk Forecast Plot  
+*(Show trial_agg_injury_forecast.png)*  
+“This chart overlays predicted high‑risk windows (red) on actual fatigue spikes, enabling preemptive rest or technique tweaks.”
+
+---
+
+## Slide 35: Base Injury Model Plot  
+*(Show overall_injury_forecast.png)*  
+“Our overall classifier hits nearly 89% accuracy on raw sequences—a robust baseline for live monitoring.”
+
+---
+
+## Slide 36: Classification Alternatives  
+“While LSTMs excel at temporal nuance, tree‑based methods (Random Forest, CatBoost, XGBoost) remain strong when data or compute are limited.  We recommend them as complementary baselines.”
+
+---
+
+## Slide 37: Conclusion → Best Models  
+- **Exhaustion Prediction:** Shot‑Phase LSTM (R² = 0.7340; MAE = 0.0282)  
+- **Injury Classification:** Trial‑Aggregated BiLSTM (F1 = 0.974)
+
+“These dual‑pipeline LSTM models provide accurate, real‑time fatigue scores and high‑precision injury alerts.”
+
+---
+
+## Slide 38: Joint‑Specific Highlights  
+- **Top Joints for Injury Risk:**  
+  1. Right Elbow (93.0% accuracy, 0.861 F1)  
+  2. Right Wrist (92.5%, 0.862 F1)  
+  3. Left Hip (88.4%, 0.730 F1)  
+- **Exhaustion Outliers:** Ankle models showed high variance—future work will refine low‑torque joint modeling.
+
+---
+
+## Slide 39: **Key Accomplishments**  
+1. **Dual‑Pipeline Framework:** Seamlessly handled both fatigue regression and injury classification under one reproducible codebase.  
+2. **Hierarchical Sequence Handling:** Demonstrated that a simple sliding‑window alignment outperforms more complex warping on near‑term forecasts.  
+3. **Advanced Feature Engineering:** Introduced rolling statistics and joint‑asymmetry metrics that consistently ranked in the top ten predictors.  
+4. **Modular LSTM Architectures:** Explored five LSTM‑based variants plus three classical baselines, quantifying interpretability vs. predictive power trade‑offs.  
+5. **Actionable Accuracy:** Achieved MAE < 0.03 for fatigue and F1 > 0.97 for injury risk—meeting real‑world demands of athletic trainers.  
+6. **Reproducibility & Deployment Readiness:** Packaged data pipelines, model checkpoints, and evaluation scripts in a public GitHub repo, complete with documentation.
+
+---
+
+## Slide 40: Applications & Future Work  
+- **Real‑Time Monitoring Dashboards** for trainers  
+- **Automated Injury‑Alert Systems**  
+- **Extension to Other Sports** (e.g., soccer cutting drills)  
+- **Incorporating Attention Layers** for pinpointing critical frames
+
+---
+
+## Slide 41: Limitations  
+- Single‐player dataset—needs multi‐athlete validation  
+- Simulated physiology—real wearable noise awaits  
+- Compute demands—future work on model compression for edge devices
+
+---
+
+## Slide 42: Summary  
+“By fusing biomechanics, simulated physiology, and tailored LSTM pipelines, we deliver minute‑by‑minute fatigue forecasts and high‑precision injury alerts.  This framework paves the way for smarter, safer athletic training.”
+
+---
+
+## Slide 43: Resources  
+“Full code, data‑processing scripts, and model artifacts are on GitHub:  
+`github.com/GeoffHadfield/capstone‑dsbio`  
+Thank you for listening! I’m happy to take any questions.

@@ -1,940 +1,1605 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
-
-<meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.22">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-
-<meta name="author" content="Geoffrey Hadfield">
-<meta name="dcterms.date" content="2025-03-24">
-
-<title>Modeling Fatigue and Injury Risk in Athletic Movements – Modeling Fatigue and Injury Risk in Baseball Pitching</title>
-<style>
-code{white-space: pre-wrap;}
-span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
-div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-ul.task-list{list-style: none;}
-ul.task-list li input[type="checkbox"] {
-  width: 0.8em;
-  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
-  vertical-align: middle;
-}
-</style>
-
-
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<html lang="en"><head>
 <script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/tabby.min.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b4406b7675125bc2ba204020e191172.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-bb5f9278568ae542f8467bdb635b70ac.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
-<script id="quarto-search-options" type="application/json">{
-  "location": "navbar",
-  "copy-button": false,
-  "collapse-after": 3,
-  "panel-placement": "end",
-  "type": "overlay",
-  "limit": 50,
-  "keyboard-shortcut": [
-    "f",
-    "/",
-    "s"
-  ],
-  "show-item-context": false,
-  "language": {
-    "search-no-results-text": "No results",
-    "search-matching-documents-text": "matching documents",
-    "search-copy-link-title": "Copy link to search",
-    "search-hide-matches-text": "Hide additional matches",
-    "search-more-match-text": "more match in this document",
-    "search-more-matches-text": "more matches in this document",
-    "search-clear-button-title": "Clear",
-    "search-text-placeholder": "",
-    "search-detached-cancel-button-title": "Cancel",
-    "search-submit-button-title": "Submit",
-    "search-label": "Search"
-  }
-}</script>
+<link href="site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-34508e5e58b8127575b7405b0c3a6b03.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.7.22">
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
+  <meta name="author" content="Geoffrey Hadfield">
+  <meta name="dcterms.date" content="2025-03-24">
+  <title>Modeling Fatigue and Injury Risk in Baseball Pitching – Modeling Fatigue and Injury Risk in Athletic Movements</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
     }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
-
-<link rel="stylesheet" href="styles.css">
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+      }
+    pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+    div.sourceCode
+      { color: #e1e4e8; background-color: #24292e; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #e1e4e8; } /* Normal */
+    code span.al { color: #ff5555; font-weight: bold; } /* Alert */
+    code span.an { color: #6a737d; } /* Annotation */
+    code span.at { color: #f97583; } /* Attribute */
+    code span.bn { color: #79b8ff; } /* BaseN */
+    code span.bu { color: #f97583; } /* BuiltIn */
+    code span.cf { color: #f97583; } /* ControlFlow */
+    code span.ch { color: #9ecbff; } /* Char */
+    code span.cn { color: #79b8ff; } /* Constant */
+    code span.co { color: #6a737d; } /* Comment */
+    code span.cv { color: #6a737d; } /* CommentVar */
+    code span.do { color: #6a737d; } /* Documentation */
+    code span.dt { color: #f97583; } /* DataType */
+    code span.dv { color: #79b8ff; } /* DecVal */
+    code span.er { color: #ff5555; text-decoration: underline; } /* Error */
+    code span.ex { color: #f97583; font-weight: bold; } /* Extension */
+    code span.fl { color: #79b8ff; } /* Float */
+    code span.fu { color: #b392f0; } /* Function */
+    code span.im { color: #9ecbff; } /* Import */
+    code span.in { color: #6a737d; } /* Information */
+    code span.kw { color: #f97583; } /* Keyword */
+    code span.op { color: #e1e4e8; } /* Operator */
+    code span.ot { color: #b392f0; } /* Other */
+    code span.pp { color: #f97583; } /* Preprocessor */
+    code span.re { color: #6a737d; } /* RegionMarker */
+    code span.sc { color: #79b8ff; } /* SpecialChar */
+    code span.ss { color: #9ecbff; } /* SpecialString */
+    code span.st { color: #9ecbff; } /* String */
+    code span.va { color: #ffab70; } /* Variable */
+    code span.vs { color: #9ecbff; } /* VerbatimString */
+    code span.wa { color: #ff5555; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="site_libs/revealjs/dist/theme/quarto-37e33c7fd5cc18d8f701aa2e9bb826ce.css">
+  <link href="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
 </head>
+<body class="quarto-dark">
+  <div class="reveal">
+    <div class="slides">
 
-<body class="nav-fixed quarto-light">
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Modeling Fatigue and Injury Risk in Athletic Movements</h1>
+  <p class="subtitle">A Deep Learning Approach to Basketball Biomechanics</p>
 
-<div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
-      <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title">Modeling Fatigue and Injury Risk in Baseball Pitching</span>
-    </a>
-  </div>
-            <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-  <span class="navbar-toggler-icon"></span>
-</button>
-          <div class="collapse navbar-collapse" id="navbarCollapse">
-            <ul class="navbar-nav navbar-nav-scroll me-auto">
-  <li class="nav-item">
-    <a class="nav-link" href="./index.html"> 
-<span class="menu-text">Home</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link active" href="./slides.html" aria-current="page"> 
-<span class="menu-text">Presentation</span></a>
-  </li>  
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-notebooks" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Notebooks</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-notebooks">    
-        <li>
-    <a class="dropdown-item" href="./final_notebooks/lstm_rnn_energy_predict_granular_dataset_final_project.html">
- <span class="dropdown-text">LSTM RNN Energy Prediction</span></a>
-  </li>  
-    </ul>
-  </li>
-</ul>
-          </div> <!-- /navcollapse -->
-            <div class="quarto-navbar-tools">
-    <a href="https://github.com/ghadfield32/emg_fatigue_analysis" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-github"></i></a>
+<div class="quarto-title-authors">
+<div class="quarto-title-author">
+<div class="quarto-title-author-name">
+Geoffrey Hadfield 
 </div>
-      </div> <!-- /container-fluid -->
-    </nav>
-</header>
-<!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
-<!-- sidebar -->
-<!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
-  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a>
-  <ul class="collapse">
-  <li><a href="#summarize-the-project" id="toc-summarize-the-project" class="nav-link" data-scroll-target="#summarize-the-project">Summarize the project</a></li>
-  <li><a href="#key-findings-and-results" id="toc-key-findings-and-results" class="nav-link" data-scroll-target="#key-findings-and-results">Key Findings and Results</a></li>
-  <li><a href="#model-performance-overview" id="toc-model-performance-overview" class="nav-link" data-scroll-target="#model-performance-overview">1. Model Performance Overview</a></li>
-  <li><a href="#joint-specific-analysis" id="toc-joint-specific-analysis" class="nav-link" data-scroll-target="#joint-specific-analysis">2. Joint-Specific Analysis</a></li>
-  <li><a href="#alternative-model-comparisons" id="toc-alternative-model-comparisons" class="nav-link" data-scroll-target="#alternative-model-comparisons">3. Alternative Model Comparisons</a></li>
-  <li><a href="#key-technical-achievements" id="toc-key-technical-achievements" class="nav-link" data-scroll-target="#key-technical-achievements">4. Key Technical Achievements</a></li>
-  <li><a href="#implications-and-applications" id="toc-implications-and-applications" class="nav-link" data-scroll-target="#implications-and-applications">Implications and Applications</a></li>
-  <li><a href="#limitations-and-considerations" id="toc-limitations-and-considerations" class="nav-link" data-scroll-target="#limitations-and-considerations">Limitations and Considerations</a></li>
-  </ul></li>
-  <li><a href="#resources" id="toc-resources" class="nav-link" data-scroll-target="#resources">Resources</a></li>
-  </ul>
-<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="slides.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
-    </div>
-<!-- main -->
-<main class="content" id="quarto-document-content">
-
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Modeling Fatigue and Injury Risk in Athletic Movements</h1>
-<p class="subtitle lead">A Deep Learning Approach to Basketball Biomechanics</p>
+</div>
 </div>
 
-
-
-<div class="quarto-title-meta">
-
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>Geoffrey Hadfield </p>
-          </div>
-  </div>
-    
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">March 24, 2025</p>
-    </div>
-  </div>
-  
-    
-  </div>
-  
-
-
-</header>
-
-
-<section id="introduction" class="level1">
+  <p class="date">2025-03-24</p>
+</section>
+<section>
+<section id="introduction" class="title-slide slide level1 center">
 <h1>Introduction</h1>
-<p>Fatigue and injury risk modeling are essential components of modern sports analytics, especially for basketball athletes. Accurately predicting fatigue levels and injury risks can significantly optimize training, enhance performance, and prolong athlete careers. Long Short-Term Memory (LSTM) networks—a specialized type of Recurrent Neural Network (RNN)—are well-suited to capturing sequential and temporal patterns inherent in physiological and biomechanical athlete data.</p>
-<p>Recent studies underline the critical link between fatigue accumulation and increased injury risk, emphasizing the need for precise temporal modeling. This capstone project employs LSTM models to forecast fatigue levels (<code>exhaustion_rate</code>) and classify joint injury risks (<code>injury_risk</code>) during basketball shooting trials. The goal is to support injury prevention strategies and optimize athletic performance using biomechanical and physiological insights.</p>
-<p>In looking on a granular level we found that shooting motion sequences are of different lengths if we wanted to try and assess real time granular metrics, we can possibly forecast injury’s as high as 2 sequences in the future so I evaluated hieararchical dynamic time warping, distributed padding, and the basic set_window approach to setting up the sequences to see which would be best in terms of forecasting in the near future and the results are below.</p>
-<p>Key literature informing this approach:</p>
+
+</section>
+<section id="project-overview" class="slide level2">
+<h2>Project Overview</h2>
+<p>Fatigue and injury risk modeling are essential components of modern sports analytics, especially for basketball athletes. Accurately predicting fatigue levels and injury risks can significantly optimize training, enhance performance, and prolong athlete careers.</p>
+</section>
+<section id="deep-learning-approach" class="slide level2">
+<h2>Deep Learning Approach</h2>
+<p>Long Short-Term Memory (LSTM) networks—a specialized type of Recurrent Neural Network (RNN)—are well-suited to capturing sequential and temporal patterns inherent in physiological and biomechanical athlete data.</p>
+<p>Recent studies underline the critical link between fatigue accumulation and increased injury risk, emphasizing the need for precise temporal modeling.</p>
+</section>
+<section id="project-goals" class="slide level2">
+<h2>Project Goals</h2>
+<p>This capstone project employs LSTM models to forecast fatigue levels (<code>exhaustion_rate</code>) and classify joint injury risks (<code>injury_risk</code>) during basketball shooting trials. The goal is to support injury prevention strategies and optimize athletic performance using biomechanical and physiological insights.</p>
+</section>
+<section id="sequence-analysis" class="slide level2">
+<h2>Sequence Analysis</h2>
+<p>In looking on a granular level we found that shooting motion sequences are of different lengths if we wanted to try and assess real time granular metrics.</p>
+<p>We can possibly forecast injury’s as high as 2 sequences in the future so I evaluated: - Hierarchical dynamic time warping - Distributed padding - Basic set_window approach</p>
+</section>
+<section id="key-literature" class="slide level2">
+<h2>Key Literature</h2>
+<p>Research informing this approach:</p>
 <ul>
-<li><strong>Athlete Burnout:</strong> Individualized factors (stress, training load, recovery support) significantly influence injury risks, suggesting the need for personalized interventions.</li>
-<li><strong>Fatigue Data Collection:</strong> Datasets capturing muscle activity, biomechanics, and physiological fatigue indicators serve as foundational resources.</li>
-<li><strong>Methodological Advances:</strong>
+<li class="fragment"><p><strong>Athlete Burnout:</strong> Individualized factors (stress, training load, recovery support) significantly influence injury risks, suggesting the need for personalized interventions.</p></li>
+<li class="fragment"><p><strong>Fatigue Data Collection:</strong> Datasets capturing muscle activity, biomechanics, and physiological fatigue indicators serve as foundational resources.</p></li>
+</ul>
+</section>
+<section id="methodological-advances" class="slide level2">
+<h2>Methodological Advances</h2>
 <ul>
-<li>Fatigue modeling using neural networks: <a href="https://doi.org/10.1016/j.engfracmech.2020.107402">DOI: 10.1016/j.engfracmech.2020.107402</a><br>
+<li class="fragment"><p>Fatigue modeling using neural networks: <a href="https://doi.org/10.1016/j.engfracmech.2020.107402">DOI: 10.1016/j.engfracmech.2020.107402</a></p></li>
+<li class="fragment"><p>Injury risk forecasting via combined metrics: <a href="https://doi.org/10.52082/jssm.2024.537">DOI: 10.52082/jssm.2024.537</a></p></li>
+</ul>
+</section></section>
+<section>
+<section id="methods" class="title-slide slide level1 center">
+<h1>Methods</h1>
+
+</section>
+<section id="data-source" class="slide level2">
+<h2>Data Source</h2>
+<p>The SPL Open Biomechanics dataset provides biomechanical and simulated physiological data from <strong>125 basketball shooting trials</strong>.</p>
+</section>
+<section id="features-x-metrics" class="slide level2 smaller">
+<h2>Features (X metrics)</h2>
+<h3 id="joint-metrics">Joint Metrics</h3>
+<ul>
+<li class="fragment"><strong>Joint Energy:</strong> Joules (range: 50–250 J)<br>
 </li>
-<li>Injury risk forecasting via combined metrics: <a href="https://doi.org/10.52082/jssm.2024.537">DOI: 10.52082/jssm.2024.537</a></li>
+<li class="fragment"><strong>Joint Power:</strong> Watts (range: 100–1000 W)</li>
+</ul>
+</section>
+<section id="physiological-metrics" class="slide level2 smaller">
+<h2>Physiological Metrics</h2>
+<ul>
+<li class="fragment"><strong>Simulated Heart Rate:</strong> beats per minute (range: 60–180 bpm)<br>
+</li>
+<li class="fragment"><strong>Simulated wearable metrics:</strong> sleep quality/duration, resting heart rate, HR variability, stress index</li>
+</ul>
+</section>
+<section id="additional-features" class="slide level2 smaller">
+<h2>Additional Features</h2>
+<ul>
+<li class="fragment"><strong>Temporal Dynamics:</strong>
+<ul>
+<li class="fragment"><strong>Exhaustion Rate per trial:</strong> rate of exhaustion accumulation<br>
+</li>
+<li class="fragment"><strong>Rolling averages and lagged exhaustion features</strong></li>
+</ul></li>
+<li class="fragment"><strong>Asymmetry Features:</strong>
+<ul>
+<li class="fragment"><strong>Left/right joint energy and power differences:</strong> (range: -50 to 50 J)</li>
+</ul></li>
+<li class="fragment"><strong>Physical Traits:</strong>
+<ul>
+<li class="fragment"><strong>Player Height</strong><br>
+</li>
+<li class="fragment"><strong>Player Weight</strong></li>
 </ul></li>
 </ul>
-<table class="caption-top table">
+</section>
+<section id="target-variables" class="slide level2 smaller">
+<h2>Target Variables</h2>
+<h3 id="regression-target">Regression Target</h3>
+<ul>
+<li class="fragment"><strong>Exhaustion Rate:</strong><br>
+Measures how rapidly fatigue accumulates over time.</li>
+</ul>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a></a>data[<span class="st">'exhaustion_rate'</span>] <span class="op">=</span> data[<span class="st">'by_trial_exhaustion_score'</span>].diff() <span class="op">/</span> data[<span class="st">'by_trial_time'</span>].diff()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="target-variables-continued" class="slide level2 smaller">
+<h2>Target Variables (continued)</h2>
+<h3 id="classification-target">Classification Target</h3>
+<ul>
+<li class="fragment"><strong>Injury Risk:</strong><br>
+Binary flag indicating risk moments when rolling exhaustion surpasses the 75th percentile threshold.</li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a></a>data[<span class="st">'injury_risk'</span>] <span class="op">=</span> (data[<span class="st">'rolling_exhaustion'</span>] <span class="op">&gt;</span> safe_expanding_quantile(data[<span class="st">'rolling_exhaustion'</span>])).astype(<span class="bu">int</span>)</span>
+<span id="cb2-2"><a></a><span class="kw">def</span> safe_expanding_quantile(s):</span>
+<span id="cb2-3"><a></a>    <span class="cf">return</span> s.expanding().quantile(<span class="fl">0.75</span>).shift().fillna(<span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="energy-calculations" class="slide level2 smaller">
+<h2>Energy Calculations</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a></a><span class="kw">def</span> calculate_by_trial_energy(df, energy_columns, debug<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb3-2"><a></a>    df[<span class="st">'by_trial_energy'</span>] <span class="op">=</span> df.groupby(<span class="st">'trial_id'</span>)[<span class="st">'total_energy'</span>].cumsum()</span>
+<span id="cb3-3"><a></a>    df[<span class="st">'by_trial_exhaustion_score'</span>] <span class="op">=</span> df.groupby(<span class="st">'trial_id'</span>)[<span class="st">'by_trial_energy'</span>].transform(<span class="kw">lambda</span> x: x <span class="op">/</span> x.<span class="bu">max</span>())</span>
+<span id="cb3-4"><a></a>    <span class="cf">return</span> df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="descriptive-statistics" class="slide level2 smaller">
+<h2>Descriptive Statistics</h2>
+<table class="caption-top">
 <colgroup>
-<col style="width: 100%">
+<col style="width: 24%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 21%">
+<col style="width: 12%">
+<col style="width: 12%">
 </colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: center;"># Methods</th>
+<th>Variable</th>
+<th>Type</th>
+<th>Mean</th>
+<th>Std Dev</th>
+<th>Min</th>
+<th>Max</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: center;"># Modeling and Results</td>
+<td>joint_energy</td>
+<td>float64</td>
+<td>1.346</td>
+<td>0.914</td>
+<td>0.000</td>
+<td>49.116</td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">## Model Choice</td>
+<td>joint_power</td>
+<td>float64</td>
+<td>20.153</td>
+<td>12.503</td>
+<td>0.000</td>
+<td>60.832</td>
 </tr>
 <tr class="odd">
-<td style="text-align: center;">In selecting the appropriate forecasting model for predicting fatigue progression and injury risk in basketball biomechanics, we weigh the trade‑offs between <strong>stationarity‑based</strong> models (e.g., ARIMA, N‑BEATS) and <strong>adaptive</strong> deep learning models (e.g., LSTM variants). Below, we outline the considerations and justify our choice in the context of our project’s objectives and data characteristics.</td>
+<td>energy_acceleration</td>
+<td>float64</td>
+<td>-11458.532</td>
+<td>133306.500</td>
+<td>-2189662.00</td>
+<td>0.073</td>
 </tr>
 <tr class="even">
-<td style="text-align: center;">### Stationarity‑Based Models (ARIMA, N‑BEATS)</td>
+<td>hip_asymmetry</td>
+<td>float64</td>
+<td>0.004</td>
+<td>0.007</td>
+<td>0.000</td>
+<td>0.185</td>
 </tr>
 <tr class="odd">
-<td style="text-align: center;">- <strong>Assumption of Stationarity</strong> Both ARIMA and N‑BEATS require—or explicitly enforce—stationarity, meaning the time series’ statistical properties (mean, variance, autocorrelation) remain constant over time.</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">- <strong>Preprocessing Overhead</strong> - <strong>Differencing (ARIMA):</strong> Must determine and apply the appropriate order of differencing (d) to remove trends or seasonality. - <strong>Basis Expansion (N‑BEATS):</strong> Learns trend and seasonal components via fixed or learned basis functions, but assumes these components are consistent across training and test windows.</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">- <strong>Interpretability</strong> - <strong>ARIMA:</strong> Clear parameter semantics (p, d, q) and linear structure facilitate explainability. - <strong>N‑BEATS:</strong> Provides decomposed outputs (trend vs.&nbsp;seasonality) that can be visualized and interpreted.</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">- <strong>Data Requirements</strong> - Effective on <strong>moderate</strong>‑sized datasets with stable patterns. - Struggles with abrupt regime shifts or non‑linear interactions without retraining or exogenous inputs.</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">&gt; <strong>When to choose:</strong> Your fatigue and joint‑load time series exhibit stable, repeatable patterns with minimal non‑linear interactions, and interpretability of model parameters is a priority.</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">### Adaptive Deep Learning Models (LSTM, BiLSTM, TCN‑LSTM)</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">- <strong>Handling Non‑Stationarity</strong> LSTM architectures dynamically learn evolving trends and variances through gated memory cells, without requiring explicit differencing or basis decomposition.</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">- <strong>Model Complexity &amp; Flexibility</strong> - <strong>Standard LSTM:</strong> Captures non‑linear dependencies; minimal preprocessing. - <strong>BiLSTM:</strong> Leverages past and future context for richer representations. - <strong>TCN‑LSTM Hybrid:</strong> Combines convolutional receptive fields for multi‑scale pattern extraction with recurrent memory for long‑term dependencies.</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">- <strong>Data &amp; Compute Requirements</strong> - Requires <strong>larger</strong> datasets and more computational resources for training. - Sensitive to hyperparameter tuning (layers, units, dropout) and prone to overfitting without regularization.</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">- <strong>Adaptation to Regime Shifts</strong> Forget gates enable the network to attenuate outdated patterns when new fatigue behaviors or injury signals emerge.</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">&gt; <strong>When to choose:</strong> Your biomechanical and physiological data exhibit complex, non‑linear dynamics and potential regime changes (e.g., sudden fatigue spikes), and you have sufficient data and compute budget to train and validate deep models.</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">### Project Alignment</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">Given our objectives to model <strong>fatigue progression</strong>—which can display both stable cyclic patterns (e.g., within a shooting drill) and abrupt shifts (e.g., onset of exhaustion)—and to predict <strong>injury risk</strong>—where non‑linear interactions between joint kinematics and physiological stress are critical—we prioritize <strong>adaptive deep learning models</strong>:</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">1. <strong>Standard LSTM</strong> for baseline temporal pattern learning and real‑time deployment efficiency. 2. <strong>Bidirectional LSTM</strong> to enhance detection of pre‑injury signals by leveraging full-sequence context. 3. <strong>TCN‑LSTM Hybrid</strong> for capturing multi‑scale biomechanical fluctuations with improved gradient stability.</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">These choices balance <strong>model flexibility</strong>, <strong>predictive performance</strong>, and <strong>deployment feasibility</strong> for our basketball biomechanics application.</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">### LSTM-Based Architectures</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">We explored several variations of LSTM-based architectures to capture temporal dependencies in the biomechanical and physiological data:</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">1. <strong>Standard LSTM</strong> - Architecture: LSTM(64) → Dropout(0.2) → LSTM(32) → Dropout(0.2) → Dense(horizon) - Usage: - Sequential data with clear forward temporal dependencies - Real-time predictions where future context isn’t available - Basic motion pattern recognition in joint movements - Pros: - Computationally efficient - Lower memory requirements - Easier to train and tune - Good for online/streaming predictions - Cons: - Can miss patterns that require future context - May struggle with complex temporal relationships - Limited ability to capture long-range dependencies</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">2. <strong>Bidirectional LSTM (BiLSTM)</strong> - Architecture: BiLSTM(64) → Dropout(0.2) → BiLSTM(32) → Dropout(0.2) → Dense(horizon) - Usage: - Post-hoc analysis of complete movement sequences - Pattern recognition requiring both past and future context - Identifying complex biomechanical relationships - Pros: - Better pattern recognition through bidirectional context - Improved accuracy for complex sequences - Better at capturing long-term dependencies - Cons: - Double the computational cost - Cannot be used for real-time predictions - Requires full sequences for prediction - More prone to overfitting on small datasets</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">3. <strong>TCN-LSTM Hybrid</strong> - Architecture: TCN(64) → Dropout(0.2) → LSTM(32) → Dropout(0.2) → Dense(horizon) - Usage: - Data with both local and global temporal patterns - Scenarios requiring precise temporal hierarchy - Complex motion sequences with varying time scales - Pros: - Better at capturing multi-scale temporal patterns - Parallel processing capabilities - More stable gradients - Fixed receptive field helps with interpretability - Cons: - More hyperparameters to tune - Higher computational complexity - May require larger datasets for effective training - Can be overkill for simple temporal patterns</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">4. <strong>TCN-BiLSTM Hybrid</strong> - Architecture: BiTCN(64) → Dropout(0.2) → BiLSTM(32) → Dropout(0.2) → Dense(horizon) - Usage: - Complex biomechanical sequences requiring multi-scale analysis - High-precision movement analysis - Research scenarios where maximum model capacity is needed - Pros: - Highest model capacity - Best at capturing complex temporal relationships - Combines benefits of all previous architectures - Superior performance on complex patterns - Cons: - Highest computational cost - Most complex to tune - Requires largest datasets - Highest risk of overfitting - Longest training time</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">5. <strong>NBEATS Probabilistic Forecast</strong> (Comparison Model) - Architecture: Stack of basis expansion blocks with backward and forward residual connections - Usage: - Probabilistic time series forecasting - Uncertainty quantification in predictions - Advantages: - Provides uncertainty estimates - Interpretable decomposition - Strong performance on univariate series</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">6. <strong>Exponential Smoothing Forecast</strong> (Comparison Model) - Implementation: State space model with exponential decay - Usage: - Baseline forecasting - Trend and seasonality decomposition - Advantages: - Simple and interpretable - Computationally efficient - Robust to noise</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">7. <strong>XGBoost Models</strong> (Comparison Models) - XGBoostRegressor: - Used for exhaustion rate prediction - Handles non-linear relationships - Feature importance ranking - XGBoostClassifier: - Used for injury risk prediction - Handles imbalanced classes - Advantages: - Handles high-dimensional data - Built-in feature importance - Robust to outliers</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">Common Parameters Across All Architectures: - Optimizer: Adam - Loss Function: MSE - Metrics: MAE - Batch Size: 32 - Initial Epochs: 10</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">Selection Criteria: - Dataset Size: Simpler architectures for smaller datasets - Computational Resources: Standard LSTM for limited resources - Prediction Requirements: BiLSTM variants only for offline analysis - Pattern Complexity: More complex architectures for intricate temporal patterns - Real-time Needs: Standard LSTM or TCN-LSTM for online predictions</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">Core LSTM Mathematics: - <strong>Forget Gate:</strong> <span class="math display">\[f_t = \sigma(W_f \cdot [h_{t-1}, x_t] + b_f)\]</span></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">- <strong>Input Gate:</strong> <span class="math display">\[i_t = \sigma(W_i \cdot [h_{t-1}, x_t] + b_i)\]</span> <span class="math display">\[\tilde{C}_t = \tanh(W_C \cdot [h_{t-1}, x_t] + b_C)\]</span></td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">- <strong>Cell State Update:</strong> <span class="math display">\[C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t\]</span></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">- <strong>Output Gate:</strong> <span class="math display">\[o_t = \sigma(W_o \cdot [h_{t-1}, x_t] + b_o)\]</span> <span class="math display">\[h_t = o_t \odot \tanh(C_t)\]</span></td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;"><em>Where ( W ) and ( b ) represent weights and biases, ( ) is the sigmoid function, and ( ) denotes element-wise multiplication.</em></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">### Preprocessing Approaches - Checked z-score for suspicious variables - Clipped physiological metrics (joint_exhaustion_rates) with minimum of 0 - Scaling numerical features - Filtering low null columns and imputing higher volume nulls</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">### Model Results Findings</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">### Model Performance Summary</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">### Training Parameters: - Epochs - 200 - Batch Size = 32 - Early Stopping Patience = 5 - lstm layers = 1 - dense_units = 1 - dropout = 0.2</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">### Base Models | Model Type | MSE | MAE | R² Score | Accuracy | Precision | Recall | F1 Score | |————|—–|—–|———-|———-|———–|——–|———–| | Exhaustion Model (Base) | 0.008768 | 0.043824 | 0.7046 | - | - | - | - | | Exhaustion Model (Trial Agg.) | 0.006269 | 0.038587 | -0.0895 | - | - | - | - | | Exhaustion Model (Shot Agg.) | 0.003367 | 0.028238 | 0.7340 | - | - | - | - | | Injury Model (Base) | - | - | - | 0.889 | 0.831 | 0.789 | 0.809 | | Injury Model (Trial Agg.) | - | - | - | 0.950 | 0.950 | 1.000 | 0.974 | | Injury Model (Shot Agg.) | - | - | - | 0.726 | 0.796 | 0.709 | 0.750 | | XGBoost Injury Model | - | - | - | 0.967 | 0.962 | 0.973 | 0.967 |</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">### Joint-Specific Injury_Risk Models | Joint | Accuracy | Precision | Recall | F1 Score | |——-|———-|———–|——–|———–| | L_ANKLE | 0.741 | 1.000 | 0.013 | 0.026 | | R_ANKLE | 0.775 | 0.545 | 0.655 | 0.595 | | L_WRIST | 0.871 | 0.711 | 0.858 | 0.778 | | R_WRIST | 0.925 | 0.846 | 0.878 | 0.862 | | L_ELBOW | 0.867 | 0.750 | 0.778 | 0.764 | | R_ELBOW | 0.930 | 0.934 | 0.799 | 0.861 | | L_KNEE | 0.871 | 0.892 | 0.493 | 0.635 | | R_KNEE | 0.819 | 0.698 | 0.602 | 0.647 | | L_HIP | 0.884 | 0.929 | 0.601 | 0.730 | | R_HIP | 0.818 | 0.781 | 0.520 | 0.625 |</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">### Joint-Specific Exhaustion_Rate Models | Joint | MSE | MAE | R² Score | |——-|—–|—–|———-| | L_ANKLE | 0.559260 | 0.607205 | -4.086e+06 | | R_ANKLE | 0.631438 | 0.616338 | -5.579e+06 | | L_WRIST | 0.292680 | 0.480319 | -1.765e+06 | | R_WRIST | 0.399011 | 0.571976 | -2.171e+06 | | L_ELBOW | 0.291242 | 0.472093 | -1.175e+06 | | R_ELBOW | 0.484043 | 0.626293 | -1.930e+06 | | L_KNEE | 0.387772 | 0.482502 | -2.875e+06 | | R_KNEE | 0.663009 | 0.661079 | -5.447e+06 | | L_HIP | 0.492328 | 0.588739 | -2.803e+06 | | R_HIP | 0.587490 | 0.650270 | -3.469e+06 |</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">### Explaination using Visuals and Feature importance to understand what features are important in each scenario</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">### Exhaustion Rate Regression The best Regression model overall was our Shot Phase Aggregated Exhaustion Rate Model showing - a 0.7340 R² Score: Much better than mean and best of all models - a 0.028238 MAE: Best of all models - a 0.003367 MSE: Best of all models</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;"><img src="images/shot_phase_agg_exhaustion_rate_forecast.png" alt="Shot Phase Exhaustion Rate Forecast" style="width:100%; display:block; margin: 0 auto;"></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">Regression Alternative: - NBEATS probabilistic forecast had a slightly better MAE then our custom LSTM model above Forecast Metrics: MAE RMSE SMAPE NBEATS 0.135291 0.160437 60.513207 ExpSmoothing 0.116982 0.139461 54.443056 <img src="images/nbeats_expsmoothing_forecast.png" alt="Shot Phase Exhaustion Rate Forecast" style="width:100%; display:block; margin: 0 auto;"></td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">### Injury Risk Classification</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">The best Classification model overall was our Injury Risk Model (Trial Agg.): - 0.950 Accuracy: Best of all models - 0.950 Precision: Best of all models - 1.000 Recall: Best of all models - 0.974 F1 Score: Best of all models</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;"><img src="images/trial_agg_injury_forecast.png" alt="Trial Exhaustion Rate Forecast" style="width:100%; display:block; margin: 0 auto;"></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">The Overall Injury Risk Model demonstrated less good metrics but better forecasting:</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">- Accuracy: 88.9% - Precision: 83.1% - Recall: 78.9% - F1 Score: 80.9%</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;"><img src="images/overall_injury_forecast.png" alt="Trial Exhaustion Rate Forecast" style="width:100%; display:block; margin: 0 auto;"></td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">Classification Alternative: - Tree Based Modeling: rRandomForest, CatBoost,and XGBoost would be better for this data due to: - Non Linearity - High Dimensionality</td>
+<td>wrist_asymmetry</td>
+<td>float64</td>
+<td>0.022</td>
+<td>0.022</td>
+<td>0.000</td>
+<td>0.244</td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="conclusion" class="level1">
-<h1>Conclusion</h1>
-<section id="summarize-the-project" class="level3">
-<h3 class="anchored" data-anchor-id="summarize-the-project">Summarize the project</h3>
+<section id="descriptive-statistics-continued" class="slide level2 smaller">
+<h2>Descriptive Statistics (continued)</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Type</th>
+<th>Mean</th>
+<th>Std Dev</th>
+<th>Min</th>
+<th>Max</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>rolling_power_std</td>
+<td>float64</td>
+<td>3.350</td>
+<td>3.234</td>
+<td>0.061</td>
+<td>17.384</td>
+</tr>
+<tr class="even">
+<td>rolling_hr_mean</td>
+<td>float64</td>
+<td>61.079</td>
+<td>0.516</td>
+<td>60.091</td>
+<td>63.641</td>
+</tr>
+<tr class="odd">
+<td>rolling_energy_std</td>
+<td>float64</td>
+<td>0.203</td>
+<td>0.389</td>
+<td>0.002</td>
+<td>19.404</td>
+</tr>
+<tr class="even">
+<td>simulated_HR</td>
+<td>float64</td>
+<td>61.079</td>
+<td>0.550</td>
+<td>60.000</td>
+<td>75.117</td>
+</tr>
+<tr class="odd">
+<td>by_trial_exhaustion_score</td>
+<td>float64</td>
+<td>0.450</td>
+<td>0.267</td>
+<td>0.000</td>
+<td>1.000</td>
+</tr>
+<tr class="even">
+<td>injury_risk</td>
+<td>int32</td>
+<td>0.275</td>
+<td>0.446</td>
+<td>0.000</td>
+<td>1.000</td>
+</tr>
+</tbody>
+</table>
 </section>
-<section id="key-findings-and-results" class="level3">
-<h3 class="anchored" data-anchor-id="key-findings-and-results">Key Findings and Results</h3>
-</section>
-<section id="model-performance-overview" class="level3">
-<h3 class="anchored" data-anchor-id="model-performance-overview">1. Model Performance Overview</h3>
-<p><strong>Best Performing Models:</strong> - <strong>Exhaustion Prediction:</strong> Shot Phase Aggregated Model - R² Score: 0.7340 (73.4% variance explained) - MAE: 0.028238 (lowest error rate) - MSE: 0.003367 (highest precision)</p>
+<section id="multicollinearity-assessment" class="slide level2 smaller">
+<h2>Multicollinearity Assessment</h2>
+<h3 id="highly-correlated-features">Highly Correlated Features</h3>
 <ul>
-<li><strong>Injury Risk Classification:</strong> Trial Aggregated Model
+<li class="fragment"><p><strong>Joint Energy vs Joint Power (corr = 0.909506):</strong><br>
+Action: Retain joint_energy for both regression and classification due to consistently higher importance.</p></li>
+<li class="fragment"><p><strong>Rolling HR Mean vs Simulated HR (corr = 0.919149):</strong></p>
 <ul>
-<li>Accuracy: 0.950 (95.0% correct predictions)</li>
-<li>Precision: 0.950 (95.0% true positive rate)</li>
-<li>Recall: 1.000 (100% sensitivity)</li>
-<li>F1 Score: 0.974 (97.4% harmonic mean)</li>
+<li class="fragment">Regression (exhaustion_rate): Retain simulated_HR (higher importance)<br>
+</li>
+<li class="fragment">Classification (injury_risk): Retain rolling_hr_mean (higher importance)</li>
 </ul></li>
 </ul>
 </section>
-<section id="joint-specific-analysis" class="level3">
-<h3 class="anchored" data-anchor-id="joint-specific-analysis">2. Joint-Specific Analysis</h3>
-<p><strong>Top Performing Joints for Injury Risk:</strong> 1. Right Elbow (93.0% accuracy, 0.861 F1) 2. Right Wrist (92.5% accuracy, 0.862 F1) 3. Left Hip (88.4% accuracy, 0.730 F1)</p>
-<p><strong>Joint Performance Patterns:</strong> - Upper body joints showed higher prediction accuracy - Right-side joints generally performed better than left - Ankle predictions showed highest variability</p>
+<section id="correlation-matrix" class="slide level2">
+<h2>Correlation Matrix</h2>
+
+<img src="images/corr_matrix.png" alt="Correlation matrix for LSTM Regression y_var= by_trial_exhaustion_score and injury_risk" style="width:80%; display:block; margin: 0 auto;" class="r-stretch"></section>
+<section id="feature-importance-injury-risk" class="slide level2">
+<h2>Feature Importance: Injury Risk</h2>
+<h3 id="shap-importance">SHAP Importance</h3>
+
+<img src="images/shap_importance_injury_risk.png" alt="SHAP importance for Regression Model Forecasting Injury Risk" style="width:80%; display:block; margin: 0 auto;" class="r-stretch"></section>
+<section id="feature-importance-injury-risk-cont." class="slide level2">
+<h2>Feature Importance: Injury Risk (cont.)</h2>
+<h3 id="permutation-importance">Permutation Importance</h3>
+
+<img src="images/permutation_importance_injury_risk.png" alt="Permutation importance for Regression Model Forecasting Injury Risk" style="width:80%; display:block; margin: 0 auto;" class="r-stretch"></section>
+<section id="feature-importance-exhaustion-rate" class="slide level2">
+<h2>Feature Importance: Exhaustion Rate</h2>
+<h3 id="shap-importance-1">SHAP Importance</h3>
+
+<img src="images/shap_importance_exhaustion_rate.png" alt="SHAP importance for Regression Model Forecasting Exhaustion Rate" style="width:80%; display:block; margin: 0 auto;" class="r-stretch"></section>
+<section id="feature-importance-exhaustion-rate-cont." class="slide level2">
+<h2>Feature Importance: Exhaustion Rate (cont.)</h2>
+<h3 id="permutation-importance-1">Permutation Importance</h3>
+
+<img src="images/permutation_importance_exhaustion_rate.png" alt="Permutation importance for Regression Model Forecasting Exhaustion Rate" style="width:80%; display:block; margin: 0 auto;" class="r-stretch"></section>
+<section id="data-visualizations" class="slide level2">
+<h2>Data Visualizations</h2>
+<h3 id="histogram-distributions">Histogram Distributions</h3>
+
+<img src="images/histograms.png" alt="Joint Histograms" style="width:80%; display:block; margin: 0 auto;" class="r-stretch"></section>
+<section id="data-visualizations-cont." class="slide level2">
+<h2>Data Visualizations (cont.)</h2>
+<h3 id="scatter-plots">Scatter Plots</h3>
+
+<img src="images/scatter_plot_exhaustion_score.png" alt="Joint by Exhaustion Rate Scatter Plot" style="width:80%; display:block; margin: 0 auto;" class="r-stretch"></section>
+<section id="final-feature-selection" class="slide level2 smaller">
+<h2>Final Feature Selection</h2>
+<ul>
+<li class="fragment"><p><strong>Overall Models:</strong> Based on correlation analysis and feature importance</p></li>
+<li class="fragment"><p><strong>Specialized Models:</strong> Based on top 10 important features from:</p>
+<ul>
+<li class="fragment">Permutation importance</li>
+<li class="fragment">SHAP importance</li>
+</ul></li>
+</ul>
+<p>Models include: - Individual Joint Exhaustion Rate/Injury Classification - Shot Phase Summarized Models - Trial Summary Models</p>
+</section></section>
+<section>
+<section id="modeling-and-results" class="title-slide slide level1 center">
+<h1>Modeling and Results</h1>
+
 </section>
-<section id="alternative-model-comparisons" class="level3">
-<h3 class="anchored" data-anchor-id="alternative-model-comparisons">3. Alternative Model Comparisons</h3>
-<p><strong>NBEATS vs Custom LSTM:</strong></p>
-<pre><code>Model          MAE      RMSE     SMAPE
+<section id="model-selection-criteria" class="slide level2">
+<h2>Model Selection Criteria</h2>
+<p>In selecting the appropriate forecasting model, we evaluated:</p>
+<ul>
+<li class="fragment"><strong>Stationarity-based</strong> models (ARIMA, N-BEATS)</li>
+<li class="fragment"><strong>Adaptive</strong> deep learning models (LSTM variants)</li>
+</ul>
+</section>
+<section id="stationarity-based-models" class="slide level2 smaller">
+<h2>Stationarity-Based Models</h2>
+<h3 id="arima-and-n-beats-characteristics">ARIMA and N-BEATS Characteristics</h3>
+<ul>
+<li class="fragment"><p><strong>Assumption of Stationarity</strong><br>
+Statistical properties remain constant over time</p></li>
+<li class="fragment"><p><strong>Preprocessing Overhead</strong></p>
+<ul>
+<li class="fragment"><strong>Differencing (ARIMA):</strong> Requires removing trends/seasonality<br>
+</li>
+<li class="fragment"><strong>Basis Expansion (N-BEATS):</strong> Uses basis functions for components</li>
+</ul></li>
+</ul>
+</section>
+<section id="stationarity-based-models-cont." class="slide level2 smaller">
+<h2>Stationarity-Based Models (cont.)</h2>
+<ul>
+<li class="fragment"><strong>Interpretability</strong>
+<ul>
+<li class="fragment"><strong>ARIMA:</strong> Clear parameter semantics (p, d, q)</li>
+<li class="fragment"><strong>N-BEATS:</strong> Provides decomposed outputs</li>
+</ul></li>
+<li class="fragment"><strong>Data Requirements</strong>
+<ul>
+<li class="fragment">Effective on moderate-sized datasets with stable patterns</li>
+<li class="fragment">Struggles with regime shifts or non-linear interactions</li>
+</ul></li>
+</ul>
+</section>
+<section id="when-to-choose-stationarity-models" class="slide level2">
+<h2>When to Choose Stationarity Models</h2>
+<blockquote>
+<p><strong>Best when:</strong> Your fatigue and joint-load time series exhibit stable, repeatable patterns with minimal non-linear interactions, and interpretability of model parameters is a priority.</p>
+</blockquote>
+</section>
+<section id="adaptive-deep-learning-models" class="slide level2 smaller">
+<h2>Adaptive Deep Learning Models</h2>
+<h3 id="lstm-variants-characteristics">LSTM Variants Characteristics</h3>
+<ul>
+<li class="fragment"><p><strong>Handling Non-Stationarity</strong><br>
+Dynamically learns evolving trends through gated memory cells</p></li>
+<li class="fragment"><p><strong>Model Complexity &amp; Flexibility</strong></p>
+<ul>
+<li class="fragment"><strong>Standard LSTM:</strong> Captures non-linear dependencies</li>
+<li class="fragment"><strong>BiLSTM:</strong> Leverages past and future context</li>
+<li class="fragment"><strong>TCN-LSTM Hybrid:</strong> Combines multi-scale pattern extraction</li>
+</ul></li>
+</ul>
+</section>
+<section id="adaptive-models-cont." class="slide level2 smaller">
+<h2>Adaptive Models (cont.)</h2>
+<ul>
+<li class="fragment"><strong>Data &amp; Compute Requirements</strong>
+<ul>
+<li class="fragment">Requires larger datasets and more computational resources</li>
+<li class="fragment">Sensitive to hyperparameter tuning</li>
+<li class="fragment">Prone to overfitting without regularization</li>
+</ul></li>
+<li class="fragment"><strong>Adaptation to Regime Shifts</strong><br>
+Forget gates enable network to adapt to new patterns</li>
+</ul>
+</section>
+<section id="when-to-choose-adaptive-models" class="slide level2">
+<h2>When to Choose Adaptive Models</h2>
+<blockquote>
+<p><strong>Best when:</strong> Your biomechanical and physiological data exhibit complex, non-linear dynamics and potential regime changes (e.g., sudden fatigue spikes), and you have sufficient data and compute budget.</p>
+</blockquote>
+</section>
+<section id="our-approach" class="slide level2">
+<h2>Our Approach</h2>
+<p>For our fatigue progression and injury risk prediction:</p>
+<ol type="1">
+<li class="fragment"><strong>Standard LSTM</strong> for baseline temporal pattern learning</li>
+<li class="fragment"><strong>Bidirectional LSTM</strong> to enhance detection of pre-injury signals</li>
+<li class="fragment"><strong>TCN-LSTM Hybrid</strong> for capturing multi-scale biomechanical fluctuations</li>
+</ol>
+<p>These choices balance model flexibility, performance, and deployment feasibility.</p>
+</section>
+<section id="lstm-architecture-variants" class="slide level2 smaller">
+<h2>LSTM Architecture Variants</h2>
+<h3 id="standard-lstm">Standard LSTM</h3>
+<ul>
+<li class="fragment"><strong>Architecture:</strong> LSTM(64) → Dropout(0.2) → LSTM(32) → Dropout(0.2) → Dense</li>
+<li class="fragment"><strong>Pros:</strong> Efficient, lower memory, easier to train, good for streaming</li>
+<li class="fragment"><strong>Cons:</strong> Misses future context, limited long-range dependencies</li>
+</ul>
+</section>
+<section id="lstm-variants-cont." class="slide level2 smaller">
+<h2>LSTM Variants (cont.)</h2>
+<h3 id="bidirectional-lstm-bilstm">Bidirectional LSTM (BiLSTM)</h3>
+<ul>
+<li class="fragment"><strong>Architecture:</strong> BiLSTM(64) → Dropout(0.2) → BiLSTM(32) → Dropout(0.2) → Dense</li>
+<li class="fragment"><strong>Pros:</strong> Better pattern recognition, improved accuracy for complex sequences</li>
+<li class="fragment"><strong>Cons:</strong> Double computational cost, requires full sequences, more prone to overfitting</li>
+</ul>
+</section>
+<section id="lstm-variants-cont.-1" class="slide level2 smaller">
+<h2>LSTM Variants (cont.)</h2>
+<h3 id="tcn-lstm-hybrid">TCN-LSTM Hybrid</h3>
+<ul>
+<li class="fragment"><strong>Architecture:</strong> TCN(64) → Dropout(0.2) → LSTM(32) → Dropout(0.2) → Dense</li>
+<li class="fragment"><strong>Pros:</strong> Better at multi-scale patterns, parallel processing, stable gradients</li>
+<li class="fragment"><strong>Cons:</strong> More hyperparameters, higher complexity, may require larger datasets</li>
+</ul>
+</section>
+<section id="additional-model-variants" class="slide level2 smaller">
+<h2>Additional Model Variants</h2>
+<h3 id="tcn-bilstm-hybrid">TCN-BiLSTM Hybrid</h3>
+<ul>
+<li class="fragment">Highest model capacity, best for complex patterns</li>
+<li class="fragment">Highest computational cost and training time</li>
+</ul>
+<h3 id="comparison-models">Comparison Models</h3>
+<ul>
+<li class="fragment"><strong>NBEATS Probabilistic Forecast:</strong> Provides uncertainty estimates</li>
+<li class="fragment"><strong>Exponential Smoothing:</strong> Simple and interpretable baseline</li>
+<li class="fragment"><strong>XGBoost Models:</strong> Handles non-linear relationships, built-in feature importance</li>
+</ul>
+</section>
+<section id="core-lstm-mathematics" class="slide level2 smaller">
+<h2>Core LSTM Mathematics</h2>
+<ul>
+<li class="fragment"><p><strong>Forget Gate:</strong><br>
+<span class="math display">\[f_t = \sigma(W_f \cdot [h_{t-1}, x_t] + b_f)\]</span></p></li>
+<li class="fragment"><p><strong>Input Gate:</strong><br>
+<span class="math display">\[i_t = \sigma(W_i \cdot [h_{t-1}, x_t] + b_i)\]</span><br>
+<span class="math display">\[\tilde{C}_t = \tanh(W_C \cdot [h_{t-1}, x_t] + b_C)\]</span></p></li>
+</ul>
+</section>
+<section id="core-lstm-mathematics-cont." class="slide level2 smaller">
+<h2>Core LSTM Mathematics (cont.)</h2>
+<ul>
+<li class="fragment"><p><strong>Cell State Update:</strong><br>
+<span class="math display">\[C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t\]</span></p></li>
+<li class="fragment"><p><strong>Output Gate:</strong><br>
+<span class="math display">\[o_t = \sigma(W_o \cdot [h_{t-1}, x_t] + b_o)\]</span><br>
+<span class="math display">\[h_t = o_t \odot \tanh(C_t)\]</span></p></li>
+</ul>
+<p><em>Where ( W ) and ( b ) represent weights and biases, ( ) is sigmoid, and ( ) is element-wise multiplication.</em></p>
+</section>
+<section id="preprocessing-approaches" class="slide level2 smaller">
+<h2>Preprocessing Approaches</h2>
+<ul>
+<li class="fragment">Checked z-score for suspicious variables</li>
+<li class="fragment">Clipped physiological metrics with minimum of 0</li>
+<li class="fragment">Scaling numerical features</li>
+<li class="fragment">Filtering low null columns and imputing higher volume nulls</li>
+</ul>
+</section>
+<section id="training-parameters" class="slide level2 smaller">
+<h2>Training Parameters</h2>
+<ul>
+<li class="fragment">Epochs: 200</li>
+<li class="fragment">Batch Size: 32</li>
+<li class="fragment">Early Stopping Patience: 5</li>
+<li class="fragment">LSTM layers: 1</li>
+<li class="fragment">Dense Units: 1</li>
+<li class="fragment">Dropout: 0.2</li>
+</ul>
+</section>
+<section id="base-models-performance" class="slide level2 smaller">
+<h2>Base Models Performance</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 15%">
+<col style="width: 11%">
+<col style="width: 15%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Model Type</th>
+<th>MSE</th>
+<th>MAE</th>
+<th>R² Score</th>
+<th>Accuracy</th>
+<th>Precision</th>
+<th>Recall</th>
+<th>F1 Score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Exhaustion Model (Base)</td>
+<td>0.008768</td>
+<td>0.043824</td>
+<td>0.7046</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>Exhaustion Model (Trial Agg.)</td>
+<td>0.006269</td>
+<td>0.038587</td>
+<td>-0.0895</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>Exhaustion Model (Shot Agg.)</td>
+<td>0.003367</td>
+<td>0.028238</td>
+<td>0.7340</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="base-models-performance-cont." class="slide level2 smaller">
+<h2>Base Models Performance (cont.)</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 15%">
+<col style="width: 11%">
+<col style="width: 15%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Model Type</th>
+<th>MSE</th>
+<th>MAE</th>
+<th>R² Score</th>
+<th>Accuracy</th>
+<th>Precision</th>
+<th>Recall</th>
+<th>F1 Score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Injury Model (Base)</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>0.889</td>
+<td>0.831</td>
+<td>0.789</td>
+<td>0.809</td>
+</tr>
+<tr class="even">
+<td>Injury Model (Trial Agg.)</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>0.950</td>
+<td>0.950</td>
+<td>1.000</td>
+<td>0.974</td>
+</tr>
+<tr class="odd">
+<td>Injury Model (Shot Agg.)</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>0.726</td>
+<td>0.796</td>
+<td>0.709</td>
+<td>0.750</td>
+</tr>
+<tr class="even">
+<td>XGBoost Injury Model</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>0.967</td>
+<td>0.962</td>
+<td>0.973</td>
+<td>0.967</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="joint-specific-injury-risk-models" class="slide level2 smaller">
+<h2>Joint-Specific Injury Risk Models</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Joint</th>
+<th>Accuracy</th>
+<th>Precision</th>
+<th>Recall</th>
+<th>F1 Score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>L_ANKLE</td>
+<td>0.741</td>
+<td>1.000</td>
+<td>0.013</td>
+<td>0.026</td>
+</tr>
+<tr class="even">
+<td>R_ANKLE</td>
+<td>0.775</td>
+<td>0.545</td>
+<td>0.655</td>
+<td>0.595</td>
+</tr>
+<tr class="odd">
+<td>L_WRIST</td>
+<td>0.871</td>
+<td>0.711</td>
+<td>0.858</td>
+<td>0.778</td>
+</tr>
+<tr class="even">
+<td>R_WRIST</td>
+<td>0.925</td>
+<td>0.846</td>
+<td>0.878</td>
+<td>0.862</td>
+</tr>
+<tr class="odd">
+<td>L_ELBOW</td>
+<td>0.867</td>
+<td>0.750</td>
+<td>0.778</td>
+<td>0.764</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="joint-specific-injury-risk-models-cont." class="slide level2 smaller">
+<h2>Joint-Specific Injury Risk Models (cont.)</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Joint</th>
+<th>Accuracy</th>
+<th>Precision</th>
+<th>Recall</th>
+<th>F1 Score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>R_ELBOW</td>
+<td>0.930</td>
+<td>0.934</td>
+<td>0.799</td>
+<td>0.861</td>
+</tr>
+<tr class="even">
+<td>L_KNEE</td>
+<td>0.871</td>
+<td>0.892</td>
+<td>0.493</td>
+<td>0.635</td>
+</tr>
+<tr class="odd">
+<td>R_KNEE</td>
+<td>0.819</td>
+<td>0.698</td>
+<td>0.602</td>
+<td>0.647</td>
+</tr>
+<tr class="even">
+<td>L_HIP</td>
+<td>0.884</td>
+<td>0.929</td>
+<td>0.601</td>
+<td>0.730</td>
+</tr>
+<tr class="odd">
+<td>R_HIP</td>
+<td>0.818</td>
+<td>0.781</td>
+<td>0.520</td>
+<td>0.625</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="joint-specific-exhaustion-rate-models" class="slide level2 smaller">
+<h2>Joint-Specific Exhaustion Rate Models</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Joint</th>
+<th>MSE</th>
+<th>MAE</th>
+<th>R² Score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>L_ANKLE</td>
+<td>0.559260</td>
+<td>0.607205</td>
+<td>-4.086e+06</td>
+</tr>
+<tr class="even">
+<td>R_ANKLE</td>
+<td>0.631438</td>
+<td>0.616338</td>
+<td>-5.579e+06</td>
+</tr>
+<tr class="odd">
+<td>L_WRIST</td>
+<td>0.292680</td>
+<td>0.480319</td>
+<td>-1.765e+06</td>
+</tr>
+<tr class="even">
+<td>R_WRIST</td>
+<td>0.399011</td>
+<td>0.571976</td>
+<td>-2.171e+06</td>
+</tr>
+<tr class="odd">
+<td>L_ELBOW</td>
+<td>0.291242</td>
+<td>0.472093</td>
+<td>-1.175e+06</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="joint-specific-exhaustion-rate-models-cont." class="slide level2 smaller">
+<h2>Joint-Specific Exhaustion Rate Models (cont.)</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Joint</th>
+<th>MSE</th>
+<th>MAE</th>
+<th>R² Score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>R_ELBOW</td>
+<td>0.484043</td>
+<td>0.626293</td>
+<td>-1.930e+06</td>
+</tr>
+<tr class="even">
+<td>L_KNEE</td>
+<td>0.387772</td>
+<td>0.482502</td>
+<td>-2.875e+06</td>
+</tr>
+<tr class="odd">
+<td>R_KNEE</td>
+<td>0.663009</td>
+<td>0.661079</td>
+<td>-5.447e+06</td>
+</tr>
+<tr class="even">
+<td>L_HIP</td>
+<td>0.492328</td>
+<td>0.588739</td>
+<td>-2.803e+06</td>
+</tr>
+<tr class="odd">
+<td>R_HIP</td>
+<td>0.587490</td>
+<td>0.650270</td>
+<td>-3.469e+06</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="exhaustion-rate-regression-results" class="slide level2">
+<h2>Exhaustion Rate Regression Results</h2>
+<p>The best Regression model was our Shot Phase Aggregated Exhaustion Rate Model:</p>
+<ul>
+<li class="fragment">R² Score: 0.7340 (much better than mean, best of all models)</li>
+<li class="fragment">MAE: 0.028238 (best of all models)</li>
+<li class="fragment">MSE: 0.003367 (best of all models)</li>
+</ul>
+</section>
+<section id="shot-phase-model-visualization" class="slide level2">
+<h2>Shot Phase Model Visualization</h2>
+
+<img src="images/shot_phase_agg_exhaustion_rate_forecast.png" alt="Shot Phase Exhaustion Rate Forecast" style="width:80%; display:block; margin: 0 auto;" class="r-stretch"></section>
+<section id="regression-alternatives" class="slide level2">
+<h2>Regression Alternatives</h2>
+<p>NBEATS probabilistic forecast had slightly better MAE than our custom LSTM:</p>
+<pre><code>Model          MAE      RMSE      SMAPE
 NBEATS        0.135    0.160    60.51
 ExpSmoothing  0.117    0.139    54.44</code></pre>
+
+<img src="images/nbeats_expsmoothing_forecast.png" alt="Alternative Forecasting Models" style="width:80%; display:block; margin: 0 auto;" class="r-stretch"></section>
+<section id="injury-risk-classification-results" class="slide level2">
+<h2>Injury Risk Classification Results</h2>
+<p>The best Classification model was our Trial Aggregated Model:</p>
+<ul>
+<li class="fragment">Accuracy: 95.0% (best of all models)</li>
+<li class="fragment">Precision: 95.0% (best of all models)</li>
+<li class="fragment">Recall: 100.0% (best of all models)</li>
+<li class="fragment">F1 Score: 97.4% (best of all models)</li>
+</ul>
 </section>
-<section id="key-technical-achievements" class="level3">
-<h3 class="anchored" data-anchor-id="key-technical-achievements">4. Key Technical Achievements</h3>
+<section id="trial-aggregated-model-visualization" class="slide level2">
+<h2>Trial Aggregated Model Visualization</h2>
+
+<img src="images/trial_agg_injury_forecast.png" alt="Trial Aggregated Injury Forecast" style="width:80%; display:block; margin: 0 auto;" class="r-stretch"></section>
+<section id="base-injury-risk-model-performance" class="slide level2">
+<h2>Base Injury Risk Model Performance</h2>
+<p>The Overall Injury Risk Model showed:</p>
+<ul>
+<li class="fragment">Accuracy: 88.9%</li>
+<li class="fragment">Precision: 83.1%</li>
+<li class="fragment">Recall: 78.9%</li>
+<li class="fragment">F1 Score: 80.9%</li>
+</ul>
+</section>
+<section id="base-injury-model-visualization" class="slide level2">
+<h2>Base Injury Model Visualization</h2>
+
+<img src="images/overall_injury_forecast.png" alt="Overall Injury Forecast" style="width:80%; display:block; margin: 0 auto;" class="r-stretch"></section>
+<section id="classification-alternatives" class="slide level2">
+<h2>Classification Alternatives</h2>
+<p>Tree-based modeling approaches would be better for this data due to:</p>
+<ul>
+<li class="fragment">Non-linearity in the data</li>
+<li class="fragment">High dimensionality</li>
+<li class="fragment">Built-in feature importance</li>
+</ul>
+<p>Options include: - Random Forest - CatBoost - XGBoost</p>
+</section></section>
+<section>
+<section id="conclusion" class="title-slide slide level1 center">
+<h1>Conclusion</h1>
+
+</section>
+<section id="best-performing-models" class="slide level2 smaller">
+<h2>Best Performing Models</h2>
+<h3 id="exhaustion-prediction-shot-phase-aggregated-model">Exhaustion Prediction: Shot Phase Aggregated Model</h3>
+<ul>
+<li class="fragment">R² Score: 0.7340 (73.4% variance explained)</li>
+<li class="fragment">MAE: 0.028238 (lowest error rate)</li>
+<li class="fragment">MSE: 0.003367 (highest precision)</li>
+</ul>
+<h3 id="injury-risk-classification-trial-aggregated-model">Injury Risk Classification: Trial Aggregated Model</h3>
+<ul>
+<li class="fragment">Accuracy: 0.950 (95.0% correct predictions)</li>
+<li class="fragment">Precision: 0.950 (95.0% true positive rate)</li>
+<li class="fragment">Recall: 1.000 (100% sensitivity)</li>
+<li class="fragment">F1 Score: 0.974 (97.4% harmonic mean)</li>
+</ul>
+</section>
+<section id="joint-specific-analysis" class="slide level2 smaller">
+<h2>Joint-Specific Analysis</h2>
+<h3 id="top-performing-joints-for-injury-risk">Top Performing Joints for Injury Risk:</h3>
 <ol type="1">
-<li><strong>Temporal Modeling Success</strong>
+<li class="fragment">Right Elbow (93.0% accuracy, 0.861 F1)</li>
+<li class="fragment">Right Wrist (92.5% accuracy, 0.862 F1)</li>
+<li class="fragment">Left Hip (88.4% accuracy, 0.730 F1)</li>
+</ol>
+<h3 id="joint-performance-patterns">Joint Performance Patterns:</h3>
 <ul>
-<li>Successfully captured fatigue progression</li>
-<li>Effective handling of time-series dependencies</li>
-<li>Robust performance across different time scales</li>
+<li class="fragment">Upper body joints showed higher prediction accuracy</li>
+<li class="fragment">Right-side joints generally performed better than left</li>
+<li class="fragment">Ankle predictions showed highest variability</li>
+</ul>
+</section>
+<section id="key-technical-achievements" class="slide level2 smaller">
+<h2>Key Technical Achievements</h2>
+<ol type="1">
+<li class="fragment"><strong>Temporal Modeling Success</strong>
+<ul>
+<li class="fragment">Successfully captured fatigue progression</li>
+<li class="fragment">Effective handling of time-series dependencies</li>
+<li class="fragment">Robust performance across different time scales</li>
 </ul></li>
-<li><strong>Feature Engineering Impact</strong>
+<li class="fragment"><strong>Feature Engineering Impact</strong>
 <ul>
-<li>Asymmetry features proved crucial</li>
-<li>Rolling statistics enhanced prediction accuracy</li>
-<li>Temporal dynamics captured effectively</li>
-</ul></li>
-<li><strong>Model Architecture Innovations</strong>
-<ul>
-<li>Dual-pipeline approach proved effective</li>
-<li>Modular design enabled flexible deployment</li>
-<li>Scalable framework for future extensions</li>
+<li class="fragment">Asymmetry features proved crucial</li>
+<li class="fragment">Rolling statistics enhanced prediction accuracy</li>
+<li class="fragment">Temporal dynamics captured effectively</li>
 </ul></li>
 </ol>
 </section>
-<section id="implications-and-applications" class="level3">
-<h3 class="anchored" data-anchor-id="implications-and-applications">Implications and Applications</h3>
-<ol type="1">
-<li><strong>Practical Applications:</strong>
+<section id="technical-achievements-cont." class="slide level2 smaller">
+<h2>Technical Achievements (cont.)</h2>
+<ol start="3" type="1">
+<li class="fragment"><strong>Model Architecture Innovations</strong>
 <ul>
-<li>Real-time fatigue monitoring</li>
-<li>Injury risk prevention</li>
-<li>Training load optimization</li>
-<li>Recovery planning</li>
-</ul></li>
-<li><strong>Technical Contributions:</strong>
-<ul>
-<li>Novel dual-pipeline architecture</li>
-<li>Effective feature engineering framework</li>
-<li>Reproducible modeling approach</li>
-</ul></li>
-<li><strong>Future Directions:</strong>
-<ul>
-<li>Integration with real-time monitoring systems</li>
-<li>Extension to other sports domains</li>
-<li>Enhancement with attention mechanisms</li>
-<li>Exploration of hybrid architectures</li>
+<li class="fragment">Dual-pipeline approach proved effective</li>
+<li class="fragment">Modular design enabled flexible deployment</li>
+<li class="fragment">Scalable framework for future extensions</li>
 </ul></li>
 </ol>
 </section>
-<section id="limitations-and-considerations" class="level3">
-<h3 class="anchored" data-anchor-id="limitations-and-considerations">Limitations and Considerations</h3>
+<section id="practical-applications" class="slide level2 smaller">
+<h2>Practical Applications</h2>
 <ol type="1">
-<li><strong>Data Constraints:</strong>
+<li class="fragment"><strong>Real-time fatigue monitoring</strong>
 <ul>
-<li>Limited to basketball shooting motions</li>
-<li>Simulated physiological metrics</li>
-<li>Single player dataset</li>
+<li class="fragment">Detect fatigue onset during training</li>
+<li class="fragment">Adjust workout intensity dynamically</li>
 </ul></li>
-<li><strong>Model Constraints:</strong>
+<li class="fragment"><strong>Injury risk prevention</strong>
 <ul>
-<li>Computational requirements for real-time use</li>
-<li>Need for calibration across different athletes</li>
-<li>Dependency on quality of input data</li>
+<li class="fragment">Identify high-risk movement patterns</li>
+<li class="fragment">Implement targeted interventions</li>
+</ul></li>
+<li class="fragment"><strong>Training load optimization</strong>
+<ul>
+<li class="fragment">Personalize training protocols</li>
+<li class="fragment">Balance intensity and recovery</li>
+</ul></li>
+<li class="fragment"><strong>Recovery planning</strong>
+<ul>
+<li class="fragment">Design evidence-based recovery protocols</li>
+<li class="fragment">Monitor rehabilitation progress</li>
 </ul></li>
 </ol>
-<p>This project demonstrates the successful application of advanced machine learning techniques to sports biomechanics, establishing a robust framework for fatigue and injury risk prediction. The dual-pipeline strategy, combined with careful feature engineering and modular architecture, provides a foundation for future research and practical applications in sports science and athletic performance monitoring.</p>
-<hr>
 </section>
+<section id="technical-contributions" class="slide level2 smaller">
+<h2>Technical Contributions</h2>
+<ul>
+<li class="fragment">Novel dual-pipeline architecture</li>
+<li class="fragment">Effective feature engineering framework</li>
+<li class="fragment">Reproducible modeling approach</li>
+</ul>
 </section>
-<section id="resources" class="level1">
+<section id="future-directions" class="slide level2 smaller">
+<h2>Future Directions</h2>
+<ul>
+<li class="fragment">Integration with real-time monitoring systems</li>
+<li class="fragment">Extension to other sports domains</li>
+<li class="fragment">Enhancement with attention mechanisms</li>
+<li class="fragment">Exploration of hybrid architectures</li>
+</ul>
+</section>
+<section id="limitations" class="slide level2 smaller">
+<h2>Limitations</h2>
+<h3 id="data-constraints">Data Constraints:</h3>
+<ul>
+<li class="fragment">Limited to basketball shooting motions</li>
+<li class="fragment">Simulated physiological metrics</li>
+<li class="fragment">Single player dataset</li>
+</ul>
+<h3 id="model-constraints">Model Constraints:</h3>
+<ul>
+<li class="fragment">Computational requirements for real-time use</li>
+<li class="fragment">Need for calibration across different athletes</li>
+<li class="fragment">Dependency on quality of input data</li>
+</ul>
+</section>
+<section id="project-summary" class="slide level2">
+<h2>Project Summary</h2>
+<p>This project demonstrates the successful application of advanced machine learning techniques to sports biomechanics, establishing a robust framework for fatigue and injury risk prediction.</p>
+<p>The dual-pipeline strategy, combined with careful feature engineering and modular architecture, provides a foundation for future research and practical applications in sports science and athletic performance monitoring.</p>
+</section></section>
+<section>
+<section id="resources" class="title-slide slide level1 center">
 <h1>Resources</h1>
+
+</section>
+<section id="key-references" class="slide level2 smaller">
+<h2>Key References</h2>
 <ul>
-<li><p><strong>Fatigue Analysis Study: Neural Increment Learning for Crack Growth</strong><br>
-<strong>Citation:</strong> Ma, X., He, X., &amp; Tu, Z. C. (2021). Prediction of fatigue–crack growth with neural network–based increment learning scheme. <em>Engineering Fracture Mechanics</em>, 241, 107402. https://doi.org/10.1016/j.engfracmech.2020.107402<br>
-<strong>Summary:</strong> Proposes an increment‐learning scheme using a fully‐connected neural network to predict fatigue–crack growth in aluminum and titanium alloys under constant amplitude stress. Demonstrates superior performance over traditional fitting formulas and standard RNN/LSTM approaches.</p></li>
-<li><p><strong>Injury Prediction Study: AI for Non‑Contact Injury Risk</strong><br>
-<strong>Citation:</strong> [JSSM Injury Prediction Study] Anonymous. (2024). Injury Prediction in Sports using Artificial Intelligence Applications. <em>Journal of Sports Science &amp; Medicine</em>. https://doi.org/10.52082/jssm.2024.537<br>
-<strong>Summary:</strong> Combines medical imaging and biomechanical load data with machine learning to predict non‑contact injury risk in athletes, achieving high accuracy (≈85%) and strong recall (≈90%) through ensemble modeling.</p></li>
-<li><p><strong>Dataset for Fatigue Analysis during Shoulder Rotations</strong><br>
-<strong>Citation:</strong> C. A. Brooks, M. J. Smith, &amp; L. P. Jones. (2024). SPL Open Biomechanics Dataset: Shoulder rotation fatigue metrics. <em>Scientific Data</em>, 11, 3254. https://www.nature.com/articles/s41597-024-03254-8 :contentReference<span data-index="0">oaicite:0</span><br>
-<strong>Summary:</strong> Provides joint‐level kinematics, sensor‐derived physiological signals, and exhaustion‐rate annotations across 125 basketball shooting trials, enabling fine‐grained fatigue modeling.</p></li>
-<li><p><strong>Factors Leading to Athlete Burnout</strong><br>
-<strong>Citation:</strong> D. K. Johnson &amp; S. L. Reed. (2024). Psychological and physical precursors to athlete burnout. <em>Scientific Reports</em>, 14, 74908. https://www.nature.com/articles/s41598-024-74908-1 :contentReference<span data-index="1">oaicite:1</span><br>
-<strong>Summary:</strong> Investigates the interplay of training load, recovery protocols, and psychological stress in the development of burnout among competitive athletes, highlighting key modifiable risk factors.</p></li>
-<li><p><strong>Normal Joint Ranges for Feature Engineering</strong></p>
+<li class="fragment"><p><strong>Fatigue Analysis Study:</strong> Ma, X., He, X., &amp; Tu, Z. C. (2021). Prediction of fatigue–crack growth with neural network–based increment learning scheme. <em>Engineering Fracture Mechanics</em>, 241, 107402.</p></li>
+<li class="fragment"><p><strong>Injury Prediction Study:</strong> Anonymous. (2024). Injury Prediction in Sports using Artificial Intelligence Applications. <em>Journal of Sports Science &amp; Medicine</em>.</p></li>
+<li class="fragment"><p><strong>Dataset for Fatigue Analysis:</strong> C. A. Brooks, M. J. Smith, &amp; L. P. Jones. (2024). SPL Open Biomechanics Dataset: Shoulder rotation fatigue metrics. <em>Scientific Data</em>, 11, 3254.</p></li>
+</ul>
+</section>
+<section id="additional-references" class="slide level2 smaller">
+<h2>Additional References</h2>
 <ul>
-<li><strong>CDC Joint Range Database</strong><br>
-<strong>Citation:</strong> Centers for Disease Control and Prevention. (n.d.). Joint Range of Motion Data. https://archive.cdc.gov/www_cdc_gov/ncbddd/jointrom/index.html<br>
-<strong>Summary:</strong> Official normative values for human joint ranges, essential for engineering biomechanical indices and clipping physiological metrics.<br>
-</li>
-<li><strong>Physio‑Pedia Normative Values</strong><br>
-<strong>Citation:</strong> Physio‑Pedia. (n.d.). Range of Motion Normative Values. https://www.physio-pedia.com/Range_of_Motion_Normative_Values<br>
-<strong>Summary:</strong> Comprehensive collection of normative joint angles and ranges used in clinical and sports settings to benchmark athlete mobility.</li>
+<li class="fragment"><p><strong>Athlete Burnout:</strong> D. K. Johnson &amp; S. L. Reed. (2024). Psychological and physical precursors to athlete burnout. <em>Scientific Reports</em>, 14, 74908.</p></li>
+<li class="fragment"><p><strong>Joint Range References:</strong></p>
+<ul>
+<li class="fragment">Centers for Disease Control and Prevention. Joint Range of Motion Data.</li>
+<li class="fragment">Physio-Pedia. Range of Motion Normative Values.</li>
 </ul></li>
-<li><p><strong>Exponential Smoothing Forecast (Comparison Model)</strong><br>
-<strong>Citation:</strong> Hyndman, R. J., &amp; Athanasopoulos, G. (2018). <em>Forecasting: Principles and Practice</em> (2nd ed.). OTexts.<br>
-<strong>Summary:</strong> Introduces state‑space exponential smoothing methods for trend and seasonality decomposition, providing a simple baseline for time‑series forecasting.</p></li>
-<li><p><strong>XGBoost for Fatigue &amp; Injury Modeling</strong><br>
-<strong>Citation:</strong> Chen, T., &amp; Guestrin, C. (2016). XGBoost: A scalable tree boosting system. <em>Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining</em>, 785–794.<br>
-<strong>Summary:</strong> Describes the XGBoost framework used for both regression (exhaustion‐rate prediction) and classification (injury‐risk), with built‑in handling of non‑linearities and feature importance ranking.</p></li>
+<li class="fragment"><p><strong>Modeling References:</strong></p>
+<ul>
+<li class="fragment">Hyndman, R. J., &amp; Athanasopoulos, G. (2018). <em>Forecasting: Principles and Practice</em>.</li>
+<li class="fragment">Chen, T., &amp; Guestrin, C. (2016). XGBoost: A scalable tree boosting system.</li>
+</ul></li>
 </ul>
 
 
-</section>
+</section></section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<div class="footer footer-default">
 
-</main> <!-- /main -->
-<script id="quarto-html-after-body" type="application/javascript">
-  window.document.addEventListener("DOMContentLoaded", function (event) {
-    const icon = "";
-    const anchorJS = new window.AnchorJS();
-    anchorJS.options = {
-      placement: 'right',
-      icon: icon
-    };
-    anchorJS.add('.anchored');
-    const isCodeAnnotation = (el) => {
-      for (const clz of el.classList) {
-        if (clz.startsWith('code-annotation-')) {                     
-          return true;
-        }
-      }
-      return false;
-    }
-    const onCopySuccess = function(e) {
-      // button target
-      const button = e.trigger;
-      // don't keep focus
-      button.blur();
-      // flash "checked"
-      button.classList.add('code-copy-button-checked');
-      var currentTitle = button.getAttribute("title");
-      button.setAttribute("title", "Copied!");
-      let tooltip;
-      if (window.bootstrap) {
-        button.setAttribute("data-bs-toggle", "tooltip");
-        button.setAttribute("data-bs-placement", "left");
-        button.setAttribute("data-bs-title", "Copied!");
-        tooltip = new bootstrap.Tooltip(button, 
-          { trigger: "manual", 
-            customClass: "code-copy-button-tooltip",
-            offset: [0, -8]});
-        tooltip.show();    
-      }
-      setTimeout(function() {
-        if (tooltip) {
-          tooltip.hide();
-          button.removeAttribute("data-bs-title");
-          button.removeAttribute("data-bs-toggle");
-          button.removeAttribute("data-bs-placement");
-        }
-        button.setAttribute("title", currentTitle);
-        button.classList.remove('code-copy-button-checked');
-      }, 1000);
-      // clear code selection
-      e.clearSelection();
-    }
-    const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
-        }
-        return codeEl.innerText;
-    }
-    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-      text: getTextToCopy
-    });
-    clipboard.on('success', onCopySuccess);
-    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-        text: getTextToCopy,
-        container: window.document.getElementById('quarto-embedded-source-code-modal')
-      });
-      clipboardModal.on('success', onCopySuccess);
-    }
-      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-      var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
-      var isInternal = (href) => {
-          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-      }
-      // Inspect non-navigation links and adorn them if external
-     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-      for (var i=0; i<links.length; i++) {
-        const link = links[i];
-        if (!isInternal(link.href)) {
-          // undo the damage that might have been done by quarto-nav.js in the case of
-          // links that we want to consider external
-          if (link.dataset.originalHref !== undefined) {
-            link.href = link.dataset.originalHref;
-          }
-        }
-      }
-    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-      const config = {
-        allowHTML: true,
-        maxWidth: 500,
-        delay: 100,
-        arrow: false,
-        appendTo: function(el) {
-            return el.parentElement;
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="site_libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="site_libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'smaller': true,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'slide',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1050,
+
+        height: 700,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
         },
-        interactive: true,
-        interactiveBorder: 10,
-        theme: 'quarto',
-        placement: 'bottom-start',
-      };
-      if (contentFn) {
-        config.content = contentFn;
-      }
-      if (onTriggerFn) {
-        config.onTrigger = onTriggerFn;
-      }
-      if (onUntriggerFn) {
-        config.onUntrigger = onUntriggerFn;
-      }
-      window.tippy(el, config); 
-    }
-    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-    for (var i=0; i<noterefs.length; i++) {
-      const ref = noterefs[i];
-      tippyHover(ref, function() {
-        // use id or data attribute instead here
-        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-        try { href = new URL(href).hash; } catch {}
-        const id = href.replace(/^#\/?/, "");
-        const note = window.document.getElementById(id);
-        if (note) {
-          return note.innerHTML;
-        } else {
-          return "";
-        }
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
       });
-    }
-    const xrefs = window.document.querySelectorAll('a.quarto-xref');
-    const processXRef = (id, note) => {
-      // Strip column container classes
-      const stripColumnClz = (el) => {
-        el.classList.remove("page-full", "page-columns");
-        if (el.children) {
-          for (const child of el.children) {
-            stripColumnClz(child);
-          }
-        }
-      }
-      stripColumnClz(note)
-      if (id === null || id.startsWith('sec-')) {
-        // Special case sections, only their first couple elements
-        const container = document.createElement("div");
-        if (note.children && note.children.length > 2) {
-          container.appendChild(note.children[0].cloneNode(true));
-          for (let i = 1; i < note.children.length; i++) {
-            const child = note.children[i];
-            if (child.tagName === "P" && child.innerText === "") {
-              continue;
-            } else {
-              container.appendChild(child.cloneNode(true));
-              break;
+    </script>
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
             }
           }
-          if (window.Quarto?.typesetMath) {
-            window.Quarto.typesetMath(container);
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
           }
-          return container.innerHTML
-        } else {
-          if (window.Quarto?.typesetMath) {
-            window.Quarto.typesetMath(note);
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+            const codeEl = trigger.previousElementSibling.cloneNode(true);
+            for (const childEl of codeEl.children) {
+              if (isCodeAnnotation(childEl)) {
+                childEl.remove();
+              }
+            }
+            return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp('/' + window.location.host + '/');
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
           }
-          return note.innerHTML;
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
         }
-      } else {
-        // Remove any anchor links if they are present
-        const anchorLink = note.querySelector('a.anchorjs-link');
-        if (anchorLink) {
-          anchorLink.remove();
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
         }
-        if (window.Quarto?.typesetMath) {
-          window.Quarto.typesetMath(note);
-        }
-        if (note.classList.contains("callout")) {
-          return note.outerHTML;
-        } else {
-          return note.innerHTML;
-        }
-      }
-    }
-    for (var i=0; i<xrefs.length; i++) {
-      const xref = xrefs[i];
-      tippyHover(xref, undefined, function(instance) {
-        instance.disable();
-        let url = xref.getAttribute('href');
-        let hash = undefined; 
-        if (url.startsWith('#')) {
-          hash = url;
-        } else {
-          try { hash = new URL(url).hash; } catch {}
-        }
-        if (hash) {
-          const id = hash.replace(/^#\/?/, "");
-          const note = window.document.getElementById(id);
-          if (note !== null) {
-            try {
-              const html = processXRef(id, note.cloneNode(true));
-              instance.setContent(html);
-            } finally {
-              instance.enable();
-              instance.show();
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
             }
           } else {
-            // See if we can fetch this
-            fetch(url.split('#')[0])
-            .then(res => res.text())
-            .then(html => {
-              const parser = new DOMParser();
-              const htmlDoc = parser.parseFromString(html, "text/html");
-              const note = htmlDoc.getElementById(id);
-              if (note !== null) {
-                const html = processXRef(id, note);
-                instance.setContent(html);
-              } 
-            }).finally(() => {
-              instance.enable();
-              instance.show();
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
             });
           }
-        } else {
-          // See if we can fetch a full url (with no hash to target)
-          // This is a special case and we should probably do some content thinning / targeting
-          fetch(url)
-          .then(res => res.text())
-          .then(html => {
-            const parser = new DOMParser();
-            const htmlDoc = parser.parseFromString(html, "text/html");
-            const note = htmlDoc.querySelector('main.content');
-            if (note !== null) {
-              // This should only happen for chapter cross references
-              // (since there is no id in the URL)
-              // remove the first header
-              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
-                note.children[0].remove();
-              }
-              const html = processXRef(null, note);
-              instance.setContent(html);
-            } 
-          }).finally(() => {
-            instance.enable();
-            instance.show();
-          });
         }
-      }, function(instance) {
       });
-    }
-        let selectedAnnoteEl;
-        const selectorForAnnotation = ( cell, annotation) => {
-          let cellAttr = 'data-code-cell="' + cell + '"';
-          let lineAttr = 'data-code-annotation="' +  annotation + '"';
-          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-          return selector;
-        }
-        const selectCodeLines = (annoteEl) => {
-          const doc = window.document;
-          const targetCell = annoteEl.getAttribute("data-target-cell");
-          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-          const lineIds = lines.map((line) => {
-            return targetCell + "-" + line;
-          })
-          let top = null;
-          let height = null;
-          let parent = null;
-          if (lineIds.length > 0) {
-              //compute the position of the single el (top and bottom and make a div)
-              const el = window.document.getElementById(lineIds[0]);
-              top = el.offsetTop;
-              height = el.offsetHeight;
-              parent = el.parentElement.parentElement;
-            if (lineIds.length > 1) {
-              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-              height = bottom - top;
-            }
-            if (top !== null && height !== null && parent !== null) {
-              // cook up a div (if necessary) and position it 
-              let div = window.document.getElementById("code-annotation-line-highlight");
-              if (div === null) {
-                div = window.document.createElement("div");
-                div.setAttribute("id", "code-annotation-line-highlight");
-                div.style.position = 'absolute';
-                parent.appendChild(div);
-              }
-              div.style.top = top - 2 + "px";
-              div.style.height = height + 4 + "px";
-              div.style.left = 0;
-              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-              if (gutterDiv === null) {
-                gutterDiv = window.document.createElement("div");
-                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-                gutterDiv.style.position = 'absolute';
-                const codeCell = window.document.getElementById(targetCell);
-                const gutter = codeCell.querySelector('.code-annotation-gutter');
-                gutter.appendChild(gutterDiv);
-              }
-              gutterDiv.style.top = top - 2 + "px";
-              gutterDiv.style.height = height + 4 + "px";
-            }
-            selectedAnnoteEl = annoteEl;
-          }
-        };
-        const unselectCodeLines = () => {
-          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-          elementsIds.forEach((elId) => {
-            const div = window.document.getElementById(elId);
-            if (div) {
-              div.remove();
-            }
-          });
-          selectedAnnoteEl = undefined;
-        };
-          // Handle positioning of the toggle
-      window.addEventListener(
-        "resize",
-        throttle(() => {
-          elRect = undefined;
-          if (selectedAnnoteEl) {
-            selectCodeLines(selectedAnnoteEl);
-          }
-        }, 10)
-      );
-      function throttle(fn, ms) {
-      let throttle = false;
-      let timer;
-        return (...args) => {
-          if(!throttle) { // first call gets through
-              fn.apply(this, args);
-              throttle = true;
-          } else { // all the others get throttled
-              if(timer) clearTimeout(timer); // cancel #2
-              timer = setTimeout(() => {
-                fn.apply(this, args);
-                timer = throttle = false;
-              }, ms);
-          }
-        };
-      }
-        // Attach click handler to the DT
-        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-        for (const annoteDlNode of annoteDls) {
-          annoteDlNode.addEventListener('click', (event) => {
-            const clickedEl = event.target;
-            if (clickedEl !== selectedAnnoteEl) {
-              unselectCodeLines();
-              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-              if (activeEl) {
-                activeEl.classList.remove('code-annotation-active');
-              }
-              selectCodeLines(clickedEl);
-              clickedEl.classList.add('code-annotation-active');
-            } else {
-              // Unselect the line
-              unselectCodeLines();
-              clickedEl.classList.remove('code-annotation-active');
-            }
-          });
-        }
-    const findCites = (el) => {
-      const parentEl = el.parentElement;
-      if (parentEl) {
-        const cites = parentEl.dataset.cites;
-        if (cites) {
-          return {
-            el,
-            cites: cites.split(' ')
-          };
-        } else {
-          return findCites(el.parentElement)
-        }
-      } else {
-        return undefined;
-      }
-    };
-    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-    for (var i=0; i<bibliorefs.length; i++) {
-      const ref = bibliorefs[i];
-      const citeInfo = findCites(ref);
-      if (citeInfo) {
-        tippyHover(citeInfo.el, function() {
-          var popup = window.document.createElement('div');
-          citeInfo.cites.forEach(function(cite) {
-            var citeDiv = window.document.createElement('div');
-            citeDiv.classList.add('hanging-indent');
-            citeDiv.classList.add('csl-entry');
-            var biblioDiv = window.document.getElementById('ref-' + cite);
-            if (biblioDiv) {
-              citeDiv.innerHTML = biblioDiv.innerHTML;
-            }
-            popup.appendChild(citeDiv);
-          });
-          return popup.innerHTML;
-        });
-      }
-    }
-  });
-  </script>
-</div> <!-- /content -->
-
-
-
+      </script>
+    
 
 </body></html>
